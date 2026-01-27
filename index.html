@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>🌍beta games</title>
+<title>🎮 Beta Games</title>
+
 <style>
 body{
     margin:0;
@@ -12,6 +13,7 @@ body{
     text-align:center;
 }
 h1{margin:20px;}
+
 #menu{
     display:grid;
     grid-template-columns:repeat(2,1fr);
@@ -37,6 +39,7 @@ h1{margin:20px;}
     justify-content:center;
 }
 .hidden{display:none;}
+
 button{
     padding:10px 20px;
     border:none;
@@ -47,6 +50,7 @@ button{
     font-size:16px;
 }
 button:hover{background:#00cccc;}
+
 .board{
     display:grid;
     gap:5px;
@@ -73,12 +77,16 @@ button:hover{background:#00cccc;}
     font-size:28px;
     cursor:pointer;
 }
+progress{
+    width:300px;
+    height:20px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🌍 Beta Games</h1>
+<h1>🎮 Beta Games</h1>
 
 <div id="menu">
     <div class="gameTile" onclick="openGame('xo')">
@@ -116,130 +124,194 @@ function openGame(id){
     });
     document.getElementById(id).classList.remove("hidden");
 }
+function back(){
+    document.getElementById("menu").style.display="grid";
+    ["xo","snakes","uno","monopoly"].forEach(g=>{
+        document.getElementById(g).classList.add("hidden");
+    });
+}
 
 /* ================= TIC TAC TOE ================= */
 let xoBoard = Array(9).fill("");
-let xoTurn="X";
+let xoTurn = "X";
+let xoGameOver = false;
+
+function checkWin(){
+    const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+    for(let w of wins){
+        let [a,b,c] = w;
+        if(xoBoard[a] && xoBoard[a]===xoBoard[b] && xoBoard[a]===xoBoard[c]){
+            return xoBoard[a];
+        }
+    }
+    if(!xoBoard.includes("")) return "draw";
+    return null;
+}
 
 function loadXO(){
-let html=`<h2>❌⭕ Tic Tac Toe</h2>
-<p>Players take turns clicking squares. First to get 3 in a row wins.</p>
-<div class="board" style="grid-template-columns:repeat(3,80px)">`;
-xoBoard.forEach((v,i)=>{
-html+=`<div class="cell" onclick="xoMove(${i})">${v}</div>`;
-});
-html+=`</div>
-<p>Turn: ${xoTurn}</p>
-<button onclick="resetXO()">Reset</button>
-<button onclick="back()">Back</button>`;
-document.getElementById("xo").innerHTML=html;
+    let winner = checkWin();
+    if(winner) xoGameOver = true;
+
+    let html = `<h2>❌⭕ Tic Tac Toe</h2>`;
+    if(winner === "draw") html += `<h3>🤝 Draw!</h3>`;
+    else if(winner) html += `<h3>🎉 ${winner} wins!</h3>`;
+    else html += `<p>Turn: ${xoTurn}</p>`;
+
+    html += `<div class="board" style="grid-template-columns:repeat(3,80px)">`;
+    xoBoard.forEach((v,i)=>{
+        html += `<div class="cell" onclick="xoMove(${i})">${v}</div>`;
+    });
+    html += `</div>
+    <button onclick="resetXO()">Reset</button>
+    <button onclick="back()">Back</button>`;
+    document.getElementById("xo").innerHTML = html;
 }
+
 function xoMove(i){
-if(xoBoard[i]!="") return;
-xoBoard[i]=xoTurn;
-xoTurn = xoTurn==="X"?"O":"X";
-loadXO();
+    if(xoBoard[i] || xoGameOver) return;
+    xoBoard[i] = xoTurn;
+    xoTurn = xoTurn==="X"?"O":"X";
+    loadXO();
 }
-function resetXO(){xoBoard=Array(9).fill(""); xoTurn="X"; loadXO();}
+function resetXO(){
+    xoBoard = Array(9).fill("");
+    xoTurn = "X";
+    xoGameOver = false;
+    loadXO();
+}
 loadXO();
 
 /* ================= SNAKES ================= */
-let pos=0;
-const snakes={16:6,48:30};
-const ladders={3:22,20:38};
+let pos = 1;
+const snakes = {16:6, 48:30, 42:19};
+const ladders = {3:22, 8:26, 20:38};
 
 function loadSnakes(){
-let html=`<h2>🐍🪜 Snakes & Ladders</h2>
-<p>Roll dice. Reach 50 to win. Snakes pull you down. Ladders lift you up.</p>
-<p>Position: ${pos}</p>
-<button onclick="roll()">🎲 Roll Dice</button>
-<button onclick="back()">Back</button>`;
-document.getElementById("snakes").innerHTML=html;
+    let html = `<h2>🐍🪜 Snakes & Ladders</h2>
+    <p>Reach 50 to win!</p>
+    <p>Position: ${pos}</p>
+    <progress value="${pos}" max="50"></progress><br><br>
+    <button onclick="roll()">🎲 Roll Dice</button>
+    <button onclick="back()">Back</button>`;
+    document.getElementById("snakes").innerHTML = html;
 }
+
 function roll(){
-let d=Math.floor(Math.random()*6)+1;
-pos+=d;
-if(snakes[pos]) pos=snakes[pos];
-if(ladders[pos]) pos=ladders[pos];
-if(pos>=50){ alert("🎉 You Win!"); pos=0; }
-loadSnakes();
+    let d = Math.floor(Math.random()*6)+1;
+    pos += d;
+    if(snakes[pos]) pos = snakes[pos];
+    if(ladders[pos]) pos = ladders[pos];
+    if(pos >= 50){
+        alert("🎉 You Win!");
+        pos = 1;
+    }
+    loadSnakes();
 }
 loadSnakes();
 
 /* ================= UNO ================= */
-let player=[randomCard(),randomCard()];
-let cpu=[randomCard(),randomCard()];
-let pile=randomCard();
+let player = [randomCard(), randomCard(), randomCard()];
+let cpu = [randomCard(), randomCard(), randomCard()];
+let pile = randomCard();
+let turn = "player";
 
 function randomCard(){
-let colors=["red","yellow","green","blue"];
-return {color:colors[Math.floor(Math.random()*4)],
-        number:Math.floor(Math.random()*9)};
+    let colors=["red","yellow","green","blue"];
+    return {color:colors[Math.floor(Math.random()*4)],
+            number:Math.floor(Math.random()*9)};
 }
+
 function loadUNO(){
-let html=`<h2>🃏 UNO</h2>
-<p>Match color or number. First to empty hand wins.</p>
-<p>Pile: <span class="card" style="background:${pile.color}">${pile.number}</span></p>
-<h3>Your Hand</h3>`;
-player.forEach((c,i)=>{
-html+=`<span class="card" onclick="playCard(${i})" style="background:${c.color}">${c.number}</span>`;
-});
-html+=`<br><button onclick="draw()">Draw Card</button>
-<button onclick="back()">Back</button>`;
-document.getElementById("uno").innerHTML=html;
+    let html = `<h2>🃏 UNO</h2>
+    <p><b>Turn:</b> ${turn}</p>
+    <p>CPU Cards: ${cpu.length}</p>
+    <p>Pile: <span class="card" style="background:${pile.color}">${pile.number}</span></p>
+    <h3>Your Hand</h3>`;
+    player.forEach((c,i)=>{
+        html += `<span class="card" onclick="playCard(${i})" style="background:${c.color}">${c.number}</span>`;
+    });
+    html += `<br><button onclick="draw()">Draw</button>
+    <button onclick="back()">Back</button>`;
+    document.getElementById("uno").innerHTML = html;
 }
+
 function playCard(i){
-let c=player[i];
-if(c.color===pile.color || c.number===pile.number){
-pile=c;
-player.splice(i,1);
-if(player.length==0){alert("🎉 You Win!"); resetUNO();}
-cpuTurn();
+    if(turn!=="player") return;
+    let c = player[i];
+    if(c.color===pile.color || c.number===pile.number){
+        pile=c;
+        player.splice(i,1);
+        if(player.length===0){alert("🎉 You Win!"); resetUNO(); return;}
+        turn="cpu"; loadUNO(); setTimeout(cpuTurn,800);
+    } else alert("❌ Can't play that!");
 }
-loadUNO();
-}
+
 function cpuTurn(){
-cpu.push(randomCard());
+    for(let i=0;i<cpu.length;i++){
+        let c=cpu[i];
+        if(c.color===pile.color || c.number===pile.number){
+            pile=c; cpu.splice(i,1);
+            if(cpu.length===0){alert("🤖 CPU Wins!"); resetUNO(); return;}
+            turn="player"; loadUNO(); return;
+        }
+    }
+    cpu.push(randomCard());
+    turn="player"; loadUNO();
 }
-function draw(){player.push(randomCard()); loadUNO();}
+function draw(){
+    if(turn!=="player") return;
+    player.push(randomCard());
+    turn="cpu"; loadUNO(); setTimeout(cpuTurn,800);
+}
 function resetUNO(){
-player=[randomCard(),randomCard()];
-cpu=[randomCard(),randomCard()];
-pile=randomCard();
-loadUNO();
+    player=[randomCard(),randomCard(),randomCard()];
+    cpu=[randomCard(),randomCard(),randomCard()];
+    pile=randomCard();
+    turn="player";
+    loadUNO();
 }
 loadUNO();
 
 /* ================= MONOPOLY ================= */
 let money=1500;
 let position=0;
+let turns=0;
 
 function loadMonopoly(){
-let html=`<h2>🏦 Monopoly</h2>
-<p>Roll dice, move, earn or lose money.</p>
-<p>Position: ${position}</p>
-<p>Money: $${money}</p>
-<button onclick="rollM()">🎲 Roll</button>
-<button onclick="back()">Back</button>`;
-document.getElementById("monopoly").innerHTML=html;
+    let html=`<h2>🏦 Monopoly</h2>
+    <p>Reach $3000 to win!</p>
+    <p>Turn: ${turns}</p>
+    <p>Position: ${position}</p>
+    <p>Money: $${money}</p>
+    <button onclick="rollM()">🎲 Roll</button>
+    <button onclick="back()">Back</button>`;
+    document.getElementById("monopoly").innerHTML=html;
 }
-function rollM(){
-let d=Math.floor(Math.random()*6)+1;
-position=(position+d)%20;
-let event=Math.random();
-if(event<0.3) money+=100;
-else if(event<0.6) money-=100;
-if(money<=0){ alert("💸 Bankrupt!"); money=1500; position=0; }
-loadMonopoly();
-}
-loadMonopoly();
 
-function back(){
-document.getElementById("menu").style.display="grid";
-["xo","snakes","uno","monopoly"].forEach(g=>{
-document.getElementById(g).classList.add("hidden");
-});
+function rollM(){
+    turns++;
+    let d=Math.floor(Math.random()*6)+1;
+    position=(position+d)%20;
+    let event=Math.random();
+    if(event<0.3) money+=200;
+    else if(event<0.6) money-=150;
+    else money+=50;
+
+    if(money>=3000){
+        alert("🏆 You Win Monopoly!");
+        money=1500; position=0; turns=0;
+    }
+    if(money<=0){
+        alert("💸 Bankrupt!");
+        money=1500; position=0; turns=0;
+    }
+    loadMonopoly();
 }
+loadMonopoly();
 </script>
 
 </body>
