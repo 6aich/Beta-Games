@@ -40,12 +40,13 @@ let scene, camera, renderer;
 let vehicle, vehicleEmoji="🚗", speed=0, turn=0;
 let clock=new THREE.Clock();
 let emojiBuildings=[];
+let inStation = null;
 
 // Station positions
 const stations = {
-  maze: {x:50,z:50},
-  board: {x:-50,z:60},
-  rock: {x:0,z:-70}
+  maze: {x:50, z:50, radius:5},
+  board: {x:-50, z:60, radius:5},
+  rock: {x:0, z:-70, radius:5}
 };
 
 init();
@@ -142,10 +143,37 @@ function switchVehicle(){
 }
 
 // --- HUB STATIONS ---
-function goMaze(){document.getElementById("gameText").innerText="🧩 Entering Maze at coordinates "+stations.maze.x+", "+stations.maze.z;}
-function goBoard(){document.getElementById("gameText").innerText="♟️ Entering Board Games at coordinates "+stations.board.x+", "+stations.board.z;}
-function goStage(){document.getElementById("gameText").innerText="🎸 Entering Rock Stage at coordinates "+stations.rock.x+", "+stations.rock.z;}
-function backHub(){document.getElementById("gameText").innerText="🏙️ Back to Hub";}
+function goMaze(){document.getElementById("gameText").innerText="🧩 Going to Maze...";}
+function goBoard(){document.getElementById("gameText").innerText="♟️ Going to Board Games...";}
+function goStage(){document.getElementById("gameText").innerText="🎸 Going to Rock Stage...";}
+function backHub(){
+ inStation = null;
+ document.getElementById("gameText").innerText="🏙️ Back to Hub";
+}
+
+// --- ENTER STATION ---
+function enterStation(name){
+ if(inStation) return;
+ inStation = name;
+ switch(name){
+   case "maze": document.getElementById("gameText").innerText="🧩 You entered the Maze!"; break;
+   case "board": document.getElementById("gameText").innerText="♟️ You entered Board Games!"; break;
+   case "rock": document.getElementById("gameText").innerText="🎸 You entered Rock Stage!"; break;
+ }
+}
+
+// --- CHECK IF VEHICLE IS NEAR STATION ---
+function checkStations(){
+  if(inStation) return;
+  for(const [name, s] of Object.entries(stations)){
+    const dx = vehicle.position.x - s.x;
+    const dz = vehicle.position.z - s.z;
+    const distance = Math.sqrt(dx*dx + dz*dz);
+    if(distance < s.radius){
+      enterStation(name);
+    }
+  }
+}
 
 // --- ANIMATE ---
 function animate(){
@@ -166,10 +194,13 @@ function animate(){
  );
  camera.lookAt(vehicle.position);
 
+ checkStations(); // check if we entered a station
+
  renderer.render(scene,camera);
 }
 
 </script>
 </body>
 </html>
+
 
