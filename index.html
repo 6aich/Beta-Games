@@ -1,271 +1,169 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>🎮 Beta Games</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emoji Game Hub 🚘🧩</title>
 <style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:white;
-    text-align:center;
-}
-h1{margin:20px;}
-#menu{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:30px;
-    padding:40px;
-}
-.gameTile{
-    background:#111;
-    border-radius:20px;
-    padding:15px;
-    cursor:pointer;
-    transition:0.3s;
-}
-.gameTile:hover{
-    transform:scale(1.05);
-    box-shadow:0 0 20px #00ffff;
-}
-.gameImage{
-    height:150px;
-    font-size:100px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-.hidden{display:none;}
-button{
-    padding:10px 20px;
-    border:none;
-    border-radius:8px;
-    background:#00ffff;
-    cursor:pointer;
-    margin:10px;
-    font-size:16px;
-}
-button:hover{background:#00cccc;}
-.board, .chessboard{
-    display:grid;
-    gap:2px;
-    justify-content:center;
-}
-.cell{
-    width:80px;
-    height:80px;
-    background:#222;
-    font-size:50px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-}
-.card{
-    width:60px;
-    height:90px;
-    border-radius:8px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    margin:5px;
-    font-size:28px;
-    cursor:pointer;
-}
-.chessCell{
-    width:60px;
-    height:60px;
-    font-size:40px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-}
-.whiteCell{background:#eee;color:#000;}
-.blackCell{background:#444;color:#fff;}
-.rulesBox{
-    background:#111;
-    padding:20px;
-    border-radius:15px;
-    margin:20px auto;
-    width:80%;
-    text-align:left;
-}
+  body { margin:0; font-family: Arial; background:#87ceeb; }
+  canvas { display:block; margin:auto; border:3px solid black; background:#7cfc00; }
+  h1,h2{text-align:center; color:#333;}
+  .menu, .category, .game { display:none; text-align:center; padding:10px; }
+  .menu button, .category button, .game button { padding:10px 20px; margin:5px; font-size:16px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<h1>🎮 Beta Games</h1>
+<h1>Emoji Game Hub 🚘🧩</h1>
 
-<div id="menu">
-    <div class="gameTile" onclick="showRules('xo')">
-        <div class="gameImage">❌⭕</div>
-        <h2>Tic Tac Toe</h2>
-    </div>
-    <div class="gameTile" onclick="showRules('snakes')">
-        <div class="gameImage">🐍🪜</div>
-        <h2>Snakes & Ladders</h2>
-    </div>
-    <div class="gameTile" onclick="showRules('chess')">
-        <div class="gameImage">♔♚</div>
-        <h2>Chess</h2>
-    </div>
-    <div class="gameTile" onclick="showRules('uno')">
-        <div class="gameImage">🃏</div>
-        <h2>UNO</h2>
-    </div>
-    <div class="gameTile" onclick="showRules('monopoly')">
-        <div class="gameImage">🏦</div>
-        <h2>Monopoly</h2>
-    </div>
+<!-- Main Menu -->
+<div id="mainMenu" class="menu" style="display:block;">
+  <h2>Select Category</h2>
+  <button onclick="openCategory('cityGame')">City & Car 🚘</button>
+  <button onclick="openCategory('boardGame')">Board Game Stations ♟️🧩</button>
+  <button onclick="openCategory('mazeGame')">Maze Game 🧩</button>
 </div>
 
-<!-- RULES SCREEN -->
-<div id="rules" class="hidden"></div>
+<!-- City Game -->
+<div id="cityGame" class="category">
+  <h2>City Map 🚘</h2>
+  <canvas id="cityCanvas" width="800" height="600"></canvas>
+  <button onclick="backToMenu('cityGame')">Back to Main Menu</button>
+</div>
 
-<!-- GAME SCREENS -->
-<div id="xo" class="hidden"></div>
-<div id="snakes" class="hidden"></div>
-<div id="chess" class="hidden"></div>
-<div id="uno" class="hidden"></div>
-<div id="monopoly" class="hidden"></div>
+<!-- Board Game Stations -->
+<div id="boardGame" class="category">
+  <h2>Board Game Stations ♟️🧩</h2>
+  <p>Choose a station to play:</p>
+  <button onclick="alert('Chess Station: Coming Soon!')">Chess ♟️</button>
+  <button onclick="alert('Checkers Station: Coming Soon!')">Checkers 🔵</button>
+  <button onclick="alert('Snakes & Ladders Station: Coming Soon!')">Snakes & Ladders 🐍🪜</button>
+  <button onclick="alert('Ludo Station: Coming Soon!')">Ludo 🎲</button>
+  <button onclick="backToMenu('boardGame')">Back to Main Menu</button>
+</div>
+
+<!-- Maze Game -->
+<div id="mazeGame" class="category">
+  <h2>Maze Game 🧩</h2>
+  <canvas id="mazeCanvas" width="600" height="600"></canvas>
+  <button onclick="backToMenu('mazeGame')">Back to Main Menu</button>
+</div>
 
 <script>
-/* ================= MENU & RULES ================= */
-let currentGame = "";
-function showRules(game){
-    currentGame = game;
-    document.getElementById("menu").style.display="none";
-    let rulesText="";
-    switch(game){
-        case "xo":
-            rulesText=`<b>Players:</b> 2 or VS AI<br>
-            <b>Goal:</b> Get 3 in a row.<br>
-            <b>Rules:</b> Click a cell to place your X or O.`;
-            break;
-        case "snakes":
-            rulesText=`<b>Players:</b> 1+<br>
-            <b>Goal:</b> Reach 50 first.<br>
-            <b>Rules:</b> Roll dice to move. Land on ladder → up, snake → down.`;
-            break;
-        case "uno":
-            rulesText=`<b>Players:</b> VS AI or VS Person<br>
-            <b>Goal:</b> Empty your hand first.<br>
-            <b>Rules:</b> Match number or color of top card. Draw if no match.`;
-            break;
-        case "monopoly":
-            rulesText=`<b>Players:</b> VS AI or VS Person<br>
-            <b>Goal:</b> Reach $3000 first.<br>
-            <b>Rules:</b> Roll dice, move, random events can gain/lose money.`;
-            break;
-        case "chess":
-            rulesText=`<b>Players:</b> VS AI or VS Person<br>
-            <b>Goal:</b> Checkmate opponent King.<br>
-            <b>Rules:</b> Standard chess rules: Pawns 1/2 squares, Rooks straight, Bishops diagonal, Queen both, Knight L-shape, King 1 square, Check & Checkmate.`;
-            break;
+// ---------- Menu Navigation ----------
+function openCategory(id){
+  document.getElementById('mainMenu').style.display='none';
+  document.getElementById(id).style.display='block';
+  if(id==='cityGame') cityInit();
+  if(id==='mazeGame') mazeInit();
+}
+function backToMenu(id){
+  document.getElementById(id).style.display='none';
+  document.getElementById('mainMenu').style.display='block';
+}
+
+// ---------- City & Car Game ----------
+let cityCanvas, cityCtx, playerCar, cityKeys;
+function cityInit(){
+  cityCanvas = document.getElementById('cityCanvas');
+  cityCtx = cityCanvas.getContext('2d');
+  playerCar = {x:400,y:500,emoji:"🚘"};
+  cityKeys={};
+  document.addEventListener('keydown',e=>cityKeys[e.key]=true);
+  document.addEventListener('keyup',e=>cityKeys[e.key]=false);
+  cityLoop();
+}
+
+function cityUpdate(){
+  if(cityKeys["ArrowUp"]) playerCar.y-=5;
+  if(cityKeys["ArrowDown"]) playerCar.y+=5;
+  if(cityKeys["ArrowLeft"]) playerCar.x-=5;
+  if(cityKeys["ArrowRight"]) playerCar.x+=5;
+  // Keep in bounds
+  playerCar.x=Math.max(0,Math.min(cityCanvas.width-40,playerCar.x));
+  playerCar.y=Math.max(0,Math.min(cityCanvas.height-40,playerCar.y));
+}
+
+function cityDraw(){
+  cityCtx.clearRect(0,0,cityCanvas.width,cityCanvas.height);
+  // Roads
+  cityCtx.fillStyle="#555";
+  cityCtx.fillRect(100,0,200,cityCanvas.height);
+  cityCtx.fillRect(500,0,200,cityCanvas.height);
+  // Skyscrapers 🏙️
+  for(let i=0;i<5;i++){
+    cityCtx.fillStyle="#333";
+    cityCtx.fillRect(i*150+50,50,80,200);
+    cityCtx.font="30px Arial";
+    cityCtx.fillText("🏙️",i*150+50,40);
+  }
+  // Board Game Stations
+  cityCtx.fillStyle="orange";
+  cityCtx.font="30px Arial";
+  cityCtx.fillText("♟️ Chess",150,550);
+  cityCtx.fillText("🔵 Checkers",550,550);
+  // Player Car
+  cityCtx.fillText(playerCar.emoji,playerCar.x,playerCar.y);
+}
+
+function cityLoop(){ cityUpdate(); cityDraw(); requestAnimationFrame(cityLoop); }
+
+// ---------- Maze Game ----------
+let mazeCanvas, mazeCtx, mazePlayer, mazeLevel, mazeGrid;
+const cellSize=40, gridSize=15;
+
+function mazeInit(){
+  mazeCanvas = document.getElementById('mazeCanvas');
+  mazeCtx = mazeCanvas.getContext('2d');
+  mazeLevel=1;
+  startMazeLevel();
+  document.addEventListener('keydown', mazeKeyHandler);
+}
+
+function startMazeLevel(){
+  mazeGrid=[];
+  for(let y=0;y<gridSize;y++){
+    let row=[];
+    for(let x=0;x<gridSize;x++){
+      if(Math.random()<0.2 + mazeLevel*0.02) row.push(1); else row.push(0);
     }
-    document.getElementById("rules").innerHTML=
-        `<div class="rulesBox"><h2>Rules for ${game.toUpperCase()}</h2>${rulesText}<br>
-        <button onclick="chooseMode('${game}')">Start Game</button>
-        <button onclick="backToMenu()">Back</button></div>`;
-    document.getElementById("rules").classList.remove("hidden");
+    mazeGrid.push(row);
+  }
+  mazePlayer={x:0,y:0};
+  mazeGrid[0][0]=0; mazeGrid[gridSize-1][gridSize-1]=0;
+  mazeDraw();
 }
-function chooseMode(game){
-    document.getElementById("rules").classList.add("hidden");
-    switch(game){
-        case "xo": loadXO(); break;
-        case "snakes": loadSnakes(); break;
-        case "uno": loadUNO(); break;
-        case "monopoly": loadMonopoly(); break;
-        case "chess": loadChess(); break;
+
+function mazeKeyHandler(e){
+  let nx=mazePlayer.x, ny=mazePlayer.y;
+  if(e.key==="ArrowUp") ny--;
+  if(e.key==="ArrowDown") ny++;
+  if(e.key==="ArrowLeft") nx--;
+  if(e.key==="ArrowRight") nx++;
+  if(nx>=0&&nx<gridSize&&ny>=0&&ny<gridSize&&mazeGrid[ny][nx]===0){
+    mazePlayer.x=nx; mazePlayer.y=ny;
+  }
+  mazeDraw();
+  if(mazePlayer.x===gridSize-1 && mazePlayer.y===gridSize-1){
+    mazeLevel++;
+    if(mazeLevel>10) { alert("You completed all 10 levels!"); mazeLevel=1; }
+    startMazeLevel();
+  }
+}
+
+function mazeDraw(){
+  mazeCtx.clearRect(0,0,mazeCanvas.width,mazeCanvas.height);
+  for(let y=0;y<gridSize;y++){
+    for(let x=0;x<gridSize;x++){
+      if(mazeGrid[y][x]===1){
+        mazeCtx.fillStyle="#333"; mazeCtx.fillRect(x*cellSize,y*cellSize,cellSize,cellSize);
+      }
     }
+  }
+  mazeCtx.fillStyle="yellow";
+  mazeCtx.fillRect(mazePlayer.x*cellSize,mazePlayer.y*cellSize,cellSize,cellSize);
 }
-function backToMenu(){
-    document.getElementById("rules").classList.add("hidden");
-    document.getElementById("menu").style.display="grid";
-}
-
-/* ================= TIC TAC TOE ================= */
-let xoBoard=Array(9).fill(""), xoTurn="X", xoGameOver=false;
-function checkWinXO(){
-    const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    for(let w of wins){ let [a,b,c]=w; if(xoBoard[a] && xoBoard[a]===xoBoard[b] && xoBoard[a]===xoBoard[c]) return xoBoard[a]; }
-    if(!xoBoard.includes("")) return "draw"; return null;
-}
-function loadXO(){
-    document.getElementById("xo").classList.remove("hidden");
-    let winner=checkWinXO();
-    if(winner && !xoGameOver){ xoGameOver=true; setTimeout(()=>{alert(winner==="draw"?"Draw!":winner+" wins!");},100);}
-    let html=`<h2>❌⭕ Tic Tac Toe</h2>`;
-    if(winner==="draw") html+=`<h3>Draw!</h3>`;
-    else if(winner) html+=`<h3>${winner} wins!</h3>`;
-    else html+=`<p>Turn: ${xoTurn}</p>`;
-    html+=`<div class="board" style="grid-template-columns:repeat(3,80px)">`;
-    xoBoard.forEach((v,i)=>{html+=`<div class="cell" onclick="xoMove(${i})">${v}</div>`});
-    html+=`</div><button onclick="resetXO()">Reset</button><button onclick="backToMenu()">Back</button>`;
-    document.getElementById("xo").innerHTML=html;
-}
-function xoMove(i){ if(xoBoard[i]||xoGameOver) return; xoBoard[i]=xoTurn; xoTurn=xoTurn==="X"?"O":"X"; loadXO();}
-function resetXO(){ xoBoard=Array(9).fill(""); xoTurn="X"; xoGameOver=false; loadXO(); }
-
-/* ================= SNAKES ================= */
-let pos=1;
-const snakes={16:6,48:30,42:19};
-const ladders={3:22,8:26,20:38};
-function loadSnakes(){
-    document.getElementById("snakes").classList.remove("hidden");
-    document.getElementById("snakes").innerHTML=
-        `<h2>🐍🪜 Snakes & Ladders</h2>
-        <p>Position: ${pos}</p>
-        <progress value="${pos}" max="50"></progress><br>
-        <button onclick="roll()">🎲 Roll Dice</button>
-        <button onclick="backToMenu()">Back</button>`;
-}
-function roll(){ let d=Math.floor(Math.random()*6)+1; pos+=d; if(snakes[pos]) pos=snakes[pos]; if(ladders[pos]) pos=ladders[pos]; if(pos>=50){setTimeout(()=>{alert("You Win!"); pos=1;},100);} loadSnakes(); }
-
-/* ================= UNO ================= */
-let player=[randomCard(),randomCard(),randomCard()];
-let cpu=[randomCard(),randomCard(),randomCard()];
-let pile=randomCard(), turn="player";
-function randomCard(){let colors=["red","yellow","green","blue"]; return {color:colors[Math.floor(Math.random()*4)],number:Math.floor(Math.random()*9)};}
-function loadUNO(){ document.getElementById("uno").classList.remove("hidden"); 
-let html=`<h2>🃏 UNO</h2><p>Turn: ${turn}</p><p>Pile: <span class="card" style="background:${pile.color}">${pile.number}</span></p><h3>Your Hand</h3>`;
-player.forEach((c,i)=>{html+=`<span class="card" onclick="playCard(${i})" style="background:${c.color}">${c.number}</span>`});
-html+=`<br><button onclick="draw()">Draw</button><button onclick="backToMenu()">Back</button>`;
-document.getElementById("uno").innerHTML=html;}
-function playCard(i){ if(turn!=="player") return; let c=player[i]; if(c.color===pile.color||c.number===pile.number){ pile=c; player.splice(i,1); loadUNO(); if(player.length===0){setTimeout(()=>{alert("You Win!"); resetUNO();},100); return;} turn="cpu"; setTimeout(cpuTurn,500);} else alert("Can't play that!");}
-function cpuTurn(){ for(let i=0;i<cpu.length;i++){ let c=cpu[i]; if(c.color===pile.color||c.number===pile.number){ pile=c; cpu.splice(i,1); loadUNO(); if(cpu.length===0){setTimeout(()=>{alert("CPU Wins!"); resetUNO();},100); return;} turn="player"; return;}} cpu.push(randomCard()); turn="player"; loadUNO();}
-function draw(){if(turn!=="player") return; player.push(randomCard()); turn="cpu"; loadUNO(); setTimeout(cpuTurn,500);}
-function resetUNO(){player=[randomCard(),randomCard(),randomCard()]; cpu=[randomCard(),randomCard(),randomCard()]; pile=randomCard(); turn="player"; loadUNO();}
-
-/* ================= MONOPOLY ================= */
-let money=1500, positionM=0, turns=0;
-function loadMonopoly(){document.getElementById("monopoly").classList.remove("hidden");
-document.getElementById("monopoly").innerHTML=
-`<h2>🏦 Monopoly</h2><p>Position: ${positionM} | Money: $${money} | Turn: ${turns}</p>
-<button onclick="rollM()">Roll Dice</button><button onclick="backToMenu()">Back</button>`;}
-function rollM(){turns++; let d=Math.floor(Math.random()*6)+1; positionM=(positionM+d)%20; let event=Math.random(); if(event<0.3) money+=200; else if(event<0.6) money-=150; else money+=50; if(money>=3000){setTimeout(()=>{alert("You Win Monopoly!"); money=1500; positionM=0; turns=0;},100);} else if(money<=0){setTimeout(()=>{alert("Bankrupt!"); money=1500; positionM=0; turns=0;},100);} loadMonopoly();}
-
-/* ================= CHESS ================= */
-const initialChess=["♜","♞","♝","♛","♚","♝","♞","♜","♟","♟","♟","♟","♟","♟","♟","♟",
-                   "","","","","","","","",
-                   "","","","","","","","",
-                   "","","","","","","","",
-                   "","","","","","","","",
-                   "","","","","","","","",
-                   "♙","♙","♙","♙","♙","♙","♙","♙",
-                   "♖","♘","♗","♕","♔","♗","♘","♖"];
-let chessBoard=[], selectedPiece=-1, chessTurn="white";
-function loadChess(){document.getElementById("chess").classList.remove("hidden"); chessBoard=initialChess.slice();
-renderChess();}
-function renderChess(){let html=`<h2>♔♚ Chess (${chessTurn})</h2><div class="chessboard" style="grid-template-columns:repeat(8,60px)">`;
-for(let i=0;i<64;i++){ let color=(Math.floor(i/8)+i)%2===0?"whiteCell":"blackCell";
-html+=`<div class="chessCell ${color}" onclick="selectChess(${i})">${chessBoard[i]}</div>`;}
-html+=`</div><button onclick="backToMenu()">Back</button>`; document.getElementById("chess").innerHTML=html;}
-function selectChess(i){if(selectedPiece===-1 && chessBoard[i]!==""){selectedPiece=i;} else if(selectedPiece!==-1){chessBoard[i]=chessBoard[selectedPiece]; chessBoard[selectedPiece]=""; selectedPiece=-1; chessTurn=chessTurn==="white"?"black":"white"; renderChess();}}
-
-/* ================= INITIAL LOAD ================= */
 </script>
+
 </body>
 </html>
