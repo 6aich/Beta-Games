@@ -1,203 +1,247 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fun Games Hub</title>
+<title>🌍 World Game Hub</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f0f0f0; text-align: center; margin: 0; }
-  h1 { margin-top: 20px; }
-  .game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 1000px; margin: 20px auto; }
-  .game-card { background: #fff; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); cursor: pointer; overflow: hidden; transition: transform 0.2s; }
-  .game-card:hover { transform: scale(1.05); }
-  .game-card img { width: 100%; height: 250px; object-fit: cover; display: block; }
-  .game-card h3 { margin: 10px 0; }
-  .game { display: none; margin-top: 40px; }
-  .board { display: grid; gap: 5px; margin: 20px auto; }
-  .cell { background: #fff; border: 1px solid #000; display: flex; align-items: center; justify-content: center; font-size: 2em; cursor: pointer; }
-  #snake-board { grid-template-columns: repeat(10, 50px); grid-template-rows: repeat(10, 50px); }
-  #monopoly-board { display: flex; flex-wrap: wrap; width: 500px; margin: 0 auto; }
-  .monopoly-cell { width: 60px; height: 60px; border: 1px solid #000; display:flex; align-items:center; justify-content:center; font-size:0.8em; margin:1px; }
-  .uno-hand { display:flex; justify-content:center; margin:10px; }
-  .uno-card { width:50px; height:70px; border:1px solid #000; margin:5px; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:pointer; }
-  button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    text-align:center;
+}
+h1{margin:20px;}
+#menu{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:30px;
+    padding:40px;
+}
+.gameTile{
+    background:#111;
+    border-radius:20px;
+    padding:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+.gameTile:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 20px #00ffff;
+}
+.gameImage{
+    height:200px;
+    font-size:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.hidden{display:none;}
+button{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#00ffff;
+    cursor:pointer;
+    margin:10px;
+    font-size:16px;
+}
+button:hover{background:#00cccc;}
+.board{
+    display:grid;
+    gap:5px;
+    justify-content:center;
+}
+.cell{
+    width:80px;
+    height:80px;
+    background:#222;
+    font-size:50px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+.card{
+    width:60px;
+    height:90px;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin:5px;
+    font-size:28px;
+    cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
-<h1>🎮 Fun Games Hub 🎮</h1>
+<h1>🌍 World Game Hub</h1>
 
-<div class="game-grid">
-  <div class="game-card" onclick="showGame('xo')">
-    <img src="https://i.imgur.com/3vXcD9R.jpg" alt="Tic Tac Toe">
-    <h3>Tic Tac Toe</h3>
-  </div>
-  <div class="game-card" onclick="showGame('snake')">
-    <img src="https://i.imgur.com/yF9u1uB.jpg" alt="Snakes & Ladders">
-    <h3>Snakes & Ladders 🐍🪜</h3>
-  </div>
-  <div class="game-card" onclick="showGame('monopoly')">
-    <img src="https://i.imgur.com/EGzPCE0.jpg" alt="Monopoly">
-    <h3>Monopoly</h3>
-  </div>
-  <div class="game-card" onclick="showGame('uno')">
-    <img src="https://i.imgur.com/0vG3WfH.jpg" alt="UNO">
-    <h3>UNO</h3>
-  </div>
+<div id="menu">
+    <div class="gameTile" onclick="openGame('xo')">
+        <div class="gameImage">❌⭕</div>
+        <h2>Tic Tac Toe</h2>
+    </div>
+
+    <div class="gameTile" onclick="openGame('snakes')">
+        <div class="gameImage">🐍🪜</div>
+        <h2>Snakes & Ladders</h2>
+    </div>
+
+    <div class="gameTile" onclick="openGame('uno')">
+        <div class="gameImage">🃏</div>
+        <h2>UNO</h2>
+    </div>
+
+    <div class="gameTile" onclick="openGame('monopoly')">
+        <div class="gameImage">🏦</div>
+        <h2>Monopoly</h2>
+    </div>
 </div>
 
-<!-- GAME SECTIONS -->
-<div id="xo" class="game">
-  <h2>Tic Tac Toe</h2>
-  <div id="xo-board" class="board" style="grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px);"></div>
-  <p id="xo-status"></p>
-  <button onclick="initXO()">Restart XO</button>
-</div>
-
-<div id="snake" class="game">
-  <h2>Snakes & Ladders 🐍🪜</h2>
-  <div id="snake-board"></div>
-  <p id="snake-status">Click here to roll dice</p>
-  <button onclick="initSnake()">Restart Snakes & Ladders</button>
-</div>
-
-<div id="monopoly" class="game">
-  <h2>Monopoly (Simplified)</h2>
-  <div id="monopoly-board"></div>
-  <p id="monopoly-status">Click here to roll dice</p>
-  <button onclick="initMonopoly()">Restart Monopoly</button>
-</div>
-
-<div id="uno" class="game">
-  <h2>UNO (Simplified 2-player)</h2>
-  <div id="uno-discard">Discard pile: <span id="discard-card">None</span></div>
-  <div id="uno-hands"></div>
-  <p id="uno-status"></p>
-  <button onclick="initUNO()">Restart UNO</button>
-</div>
+<!-- GAME SCREENS -->
+<div id="xo" class="hidden"></div>
+<div id="snakes" class="hidden"></div>
+<div id="uno" class="hidden"></div>
+<div id="monopoly" class="hidden"></div>
 
 <script>
-// ---------------- GAME SWITCH ----------------
-function showGame(id){
-  document.querySelectorAll('.game').forEach(g=>g.style.display='none');
-  document.getElementById(id).style.display='block';
-  window.scrollTo({top:document.getElementById(id).offsetTop, behavior:'smooth'});
-}
-
-// ---------------- TIC TAC TOE ----------------
-let xoBoard=[], xoTurn='X';
-function initXO(){
-  xoBoard=['','','','','','','','',''];
-  xoTurn='X';
-  const board=document.getElementById('xo-board'); board.innerHTML='';
-  for(let i=0;i<9;i++){
-    const cell=document.createElement('div'); cell.className='cell';
-    cell.addEventListener('click',()=>xoClick(i));
-    board.appendChild(cell);
-  }
-  document.getElementById('xo-status').innerText="Turn: X";
-}
-function xoClick(i){
-  if(xoBoard[i]===''){
-    xoBoard[i]=xoTurn;
-    document.getElementById('xo-board').children[i].innerText=xoTurn;
-    if(checkXO()){ document.getElementById('xo-status').innerText=xoTurn+" Wins!"; return; }
-    if(!xoBoard.includes('')){ document.getElementById('xo-status').innerText="Draw!"; return; }
-    xoTurn=xoTurn==='X'?'O':'X';
-    document.getElementById('xo-status').innerText="Turn: "+xoTurn;
-  }
-}
-function checkXO(){
-  const win=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-  return win.some(c=>c.every(i=>xoBoard[i]===xoTurn));
-}
-initXO();
-
-// ---------------- SNAKES & LADDERS ----------------
-let snakePlayer=0,snakePositions=[0,0];
-const snakeLadders={3:22,5:8,11:26,20:29,17:4,19:7,21:9,27:1};
-function initSnake(){
-  snakePlayer=0; snakePositions=[0,0];
-  const board=document.getElementById('snake-board'); board.innerHTML='';
-  for(let i=100;i>=1;i--){
-    const cell=document.createElement('div'); cell.className='cell';
-    let text=i; if(snakeLadders[i]>i) text+='🪜'; if(snakeLadders[i]<i) text+='🐍';
-    cell.innerText=text; board.appendChild(cell);
-  }
-  document.getElementById('snake-status').innerText='Player 1 Turn (Click here to roll dice)';
-}
-function rollDice(){
-  const roll=Math.floor(Math.random()*6)+1;
-  snakePositions[snakePlayer]+=roll;
-  if(snakeLadders[snakePositions[snakePlayer]]) snakePositions[snakePlayer]=snakeLadders[snakePositions[snakePlayer]];
-  if(snakePositions[snakePlayer]>=100){
-    document.getElementById('snake-status').innerText='Player '+(snakePlayer+1)+' Wins!'; return;
-  }
-  snakePlayer=1-snakePlayer;
-  document.getElementById('snake-status').innerText='Player '+(snakePlayer+1)+' Turn (Click here to roll dice)';
-}
-document.getElementById('snake-status').addEventListener('click',rollDice);
-initSnake();
-
-// ---------------- MONOPOLY ----------------
-let monoPlayer=0, monoPositions=[0,0], monoMoney=[1500,1500];
-function initMonopoly(){
-  monoPlayer=0; monoPositions=[0,0]; monoMoney=[1500,1500];
-  const board=document.getElementById('monopoly-board'); board.innerHTML='';
-  for(let i=0;i<20;i++){
-    const cell=document.createElement('div'); cell.className='monopoly-cell';
-    cell.innerText='P'+i; board.appendChild(cell);
-  }
-  document.getElementById('monopoly-status').innerText='Player 1 Turn (Click here to roll dice)';
-}
-function monoRoll(){
-  const roll=Math.floor(Math.random()*6)+1;
-  monoPositions[monoPlayer]=(monoPositions[monoPlayer]+roll)%20;
-  monoMoney[monoPlayer]-=10;
-  if(monoMoney[monoPlayer]<=0){ document.getElementById('monopoly-status').innerText='Player '+(monoPlayer+1)+' loses!'; return; }
-  monoPlayer=1-monoPlayer;
-  document.getElementById('monopoly-status').innerText='Player '+(monoPlayer+1)+' Turn (Click here to roll dice)';
-}
-document.getElementById('monopoly-status').addEventListener('click',monoRoll);
-initMonopoly();
-
-// ---------------- UNO ----------------
-let unoDeck=[], unoHands=[], discardCard, unoPlayer;
-function initUNO(){
-  unoDeck=[]; ['R','G','B','Y'].forEach(c=>{for(let i=0;i<10;i++) unoDeck.push(c+i)});
-  shuffle(unoDeck);
-  unoHands=[unoDeck.splice(0,5),unoDeck.splice(0,5)];
-  discardCard=unoDeck.pop(); unoPlayer=0; renderUNO();
-  document.getElementById('uno-status').innerText='Player 1 Turn';
-}
-function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
-function renderUNO(){
-  document.getElementById('discard-card').innerText=discardCard;
-  const handsDiv=document.getElementById('uno-hands'); handsDiv.innerHTML='';
-  unoHands.forEach((hand,i)=>{
-    const handDiv=document.createElement('div'); handDiv.className='uno-hand';
-    hand.forEach((card,j)=>{
-      const c=document.createElement('div'); c.className='uno-card';
-      c.style.backgroundColor=card[0].toLowerCase(); c.innerText=card.slice(1);
-      c.addEventListener('click',()=>playUNO(i,j));
-      handDiv.appendChild(c);
+function openGame(id){
+    document.getElementById("menu").style.display="none";
+    ["xo","snakes","uno","monopoly"].forEach(g=>{
+        document.getElementById(g).classList.add("hidden");
     });
-    handsDiv.appendChild(handDiv);
-  });
+    document.getElementById(id).classList.remove("hidden");
 }
-function playUNO(player,index){
-  if(player!==unoPlayer) return;
-  const card=unoHands[player][index];
-  if(card[0]===discardCard[0] || card.slice(1)===discardCard.slice(1)){
-    discardCard=unoHands[player].splice(index,1)[0];
-    if(unoHands[player].length===0){ document.getElementById('uno-status').innerText='Player '+(player+1)+' Wins!'; renderUNO(); return; }
-    unoPlayer=1-unoPlayer;
-    document.getElementById('uno-status').innerText='Player '+(unoPlayer+1)+' Turn';
-    renderUNO();
-  }
+
+/* ================= TIC TAC TOE ================= */
+let xoBoard = Array(9).fill("");
+let xoTurn="X";
+
+function loadXO(){
+let html=`<h2>❌⭕ Tic Tac Toe</h2>
+<p>Players take turns clicking squares. First to get 3 in a row wins.</p>
+<div class="board" style="grid-template-columns:repeat(3,80px)">`;
+xoBoard.forEach((v,i)=>{
+html+=`<div class="cell" onclick="xoMove(${i})">${v}</div>`;
+});
+html+=`</div>
+<p>Turn: ${xoTurn}</p>
+<button onclick="resetXO()">Reset</button>
+<button onclick="back()">Back</button>`;
+document.getElementById("xo").innerHTML=html;
 }
-initUNO();
+function xoMove(i){
+if(xoBoard[i]!="") return;
+xoBoard[i]=xoTurn;
+xoTurn = xoTurn==="X"?"O":"X";
+loadXO();
+}
+function resetXO(){xoBoard=Array(9).fill(""); xoTurn="X"; loadXO();}
+loadXO();
+
+/* ================= SNAKES ================= */
+let pos=0;
+const snakes={16:6,48:30};
+const ladders={3:22,20:38};
+
+function loadSnakes(){
+let html=`<h2>🐍🪜 Snakes & Ladders</h2>
+<p>Roll dice. Reach 50 to win. Snakes pull you down. Ladders lift you up.</p>
+<p>Position: ${pos}</p>
+<button onclick="roll()">🎲 Roll Dice</button>
+<button onclick="back()">Back</button>`;
+document.getElementById("snakes").innerHTML=html;
+}
+function roll(){
+let d=Math.floor(Math.random()*6)+1;
+pos+=d;
+if(snakes[pos]) pos=snakes[pos];
+if(ladders[pos]) pos=ladders[pos];
+if(pos>=50){ alert("🎉 You Win!"); pos=0; }
+loadSnakes();
+}
+loadSnakes();
+
+/* ================= UNO ================= */
+let player=[randomCard(),randomCard()];
+let cpu=[randomCard(),randomCard()];
+let pile=randomCard();
+
+function randomCard(){
+let colors=["red","yellow","green","blue"];
+return {color:colors[Math.floor(Math.random()*4)],
+        number:Math.floor(Math.random()*9)};
+}
+function loadUNO(){
+let html=`<h2>🃏 UNO</h2>
+<p>Match color or number. First to empty hand wins.</p>
+<p>Pile: <span class="card" style="background:${pile.color}">${pile.number}</span></p>
+<h3>Your Hand</h3>`;
+player.forEach((c,i)=>{
+html+=`<span class="card" onclick="playCard(${i})" style="background:${c.color}">${c.number}</span>`;
+});
+html+=`<br><button onclick="draw()">Draw Card</button>
+<button onclick="back()">Back</button>`;
+document.getElementById("uno").innerHTML=html;
+}
+function playCard(i){
+let c=player[i];
+if(c.color===pile.color || c.number===pile.number){
+pile=c;
+player.splice(i,1);
+if(player.length==0){alert("🎉 You Win!"); resetUNO();}
+cpuTurn();
+}
+loadUNO();
+}
+function cpuTurn(){
+cpu.push(randomCard());
+}
+function draw(){player.push(randomCard()); loadUNO();}
+function resetUNO(){
+player=[randomCard(),randomCard()];
+cpu=[randomCard(),randomCard()];
+pile=randomCard();
+loadUNO();
+}
+loadUNO();
+
+/* ================= MONOPOLY ================= */
+let money=1500;
+let position=0;
+
+function loadMonopoly(){
+let html=`<h2>🏦 Monopoly</h2>
+<p>Roll dice, move, earn or lose money.</p>
+<p>Position: ${position}</p>
+<p>Money: $${money}</p>
+<button onclick="rollM()">🎲 Roll</button>
+<button onclick="back()">Back</button>`;
+document.getElementById("monopoly").innerHTML=html;
+}
+function rollM(){
+let d=Math.floor(Math.random()*6)+1;
+position=(position+d)%20;
+let event=Math.random();
+if(event<0.3) money+=100;
+else if(event<0.6) money-=100;
+if(money<=0){ alert("💸 Bankrupt!"); money=1500; position=0; }
+loadMonopoly();
+}
+loadMonopoly();
+
+function back(){
+document.getElementById("menu").style.display="grid";
+["xo","snakes","uno","monopoly"].forEach(g=>{
+document.getElementById(g).classList.add("hidden");
+});
+}
 </script>
 
 </body>
 </html>
+
