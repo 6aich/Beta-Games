@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>🚘 Beta Games 3D Hub</title>
+<title>🚘 Beta Games 3D Emoji Hub</title>
 <style>
-body { margin:0; overflow:hidden; background:black; font-family:Arial; }
+body { margin:0; overflow:hidden; background:skyblue; font-family:Arial; }
 #ui { position:absolute; top:10px; left:10px; color:white; z-index:10;
      background:rgba(0,0,0,0.6); padding:10px; border-radius:10px; }
 button { font-size:16px; margin:2px; cursor:pointer; }
@@ -15,9 +15,11 @@ button { font-size:16px; margin:2px; cursor:pointer; }
 
 <div id="ui">
 <select id="vehicleSelect">
-<option value="car">🚗 Car</option>
-<option value="plane">✈️ Plane</option>
-<option value="rocket">🚀 Rocket</option>
+<option value="🚗">🚗 Car</option>
+<option value="🚕">🚕 Car</option>
+<option value="🚙">🚙 Car</option>
+<option value="✈️">✈️ Plane</option>
+<option value="🚀">🚀 Rocket</option>
 </select>
 <button onclick="switchVehicle()">Switch Vehicle</button>
 <button onclick="goMaze()">🧩 Maze</button>
@@ -27,19 +29,17 @@ button { font-size:16px; margin:2px; cursor:pointer; }
 <br><br>
 Controls: WASD / Arrow Keys
 </div>
-<div id="gameText"></div>
+<div id="gameText">🏙️ Welcome to Beta Games!</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.157/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.157/examples/js/controls/PointerLockControls.js"></script>
 
 <script>
 
 // --- CORE THREE.JS SETUP ---
 let scene, camera, renderer;
-let vehicle, vehicleType="car", speed=0, turn=0;
-let policeCars=[], policeActive=false, chaseTimer=0;
+let vehicle, vehicleEmoji="🚗", speed=0, turn=0;
 let clock=new THREE.Clock();
-let objects = [];
+let emojiBuildings=[];
 
 init();
 animate();
@@ -47,7 +47,7 @@ animate();
 // --- INIT FUNCTION ---
 function init(){
  scene = new THREE.Scene();
- scene.background = new THREE.Color(0x87ceeb);
+ scene.background = new THREE.Color(0x87ceeb); // sky
 
  camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
  camera.position.set(0,6,10);
@@ -57,7 +57,7 @@ function init(){
  document.body.appendChild(renderer.domElement);
 
  // Lights
- scene.add(new THREE.AmbientLight(0xffffff,0.5));
+ scene.add(new THREE.AmbientLight(0xffffff,0.6));
  const sun = new THREE.DirectionalLight(0xffffff,1);
  sun.position.set(10,20,10);
  scene.add(sun);
@@ -70,9 +70,8 @@ function init(){
  ground.rotation.x = -Math.PI/2;
  scene.add(ground);
 
- createCity();
- createVehicle("car");
- spawnPolice();
+ createEmojiCity();
+ createVehicle(vehicleEmoji);
 
  // Keyboard controls
  document.addEventListener("keydown", e=>{switch(e.code){
@@ -81,7 +80,7 @@ function init(){
    case "ArrowLeft": case "KeyA": turn=0.05; break;
    case "ArrowRight": case "KeyD": turn=-0.05; break;
  }});
- document.addEventListener("keyup",()=>{speed=0;turn=0;});
+ document.addEventListener("keyup",()=>{speed=0; turn=0;});
 
  window.addEventListener("resize", ()=>{
    camera.aspect=window.innerWidth/window.innerHeight;
@@ -90,53 +89,50 @@ function init(){
  });
 }
 
-// --- CREATE CITY ---
-function createCity(){
+// --- CREATE CITY WITH EMOJI BUILDINGS ---
+function createEmojiCity(){
  for(let i=0;i<40;i++){
-   const h = Math.random()*20+5;
-   const building = new THREE.Mesh(
-     new THREE.BoxGeometry(5,h,5),
-     new THREE.MeshStandardMaterial({color:0x666666})
-   );
-   building.position.set((Math.random()-0.5)*200,h/2,(Math.random()-0.5)*200);
-   scene.add(building);
-   objects.push(building);
+   const sprite = makeEmojiSprite("🏙️", 50 + Math.random()*100);
+   sprite.position.set((Math.random()-0.5)*200, sprite.scale.y/2, (Math.random()-0.5)*200);
+   scene.add(sprite);
+   emojiBuildings.push(sprite);
  }
 }
 
-// --- VEHICLE CREATION ---
-function createVehicle(type){
- if(vehicle) scene.remove(vehicle);
- let geo = new THREE.BoxGeometry(2,1,4);
- let mat = new THREE.MeshStandardMaterial({color:0xff0000});
- if(type=="plane") geo = new THREE.BoxGeometry(3,1,6);
- if(type=="rocket") geo = new THREE.CylinderGeometry(0.5,0.5,6,32);
- vehicle = new THREE.Mesh(geo,mat);
- vehicle.position.y=0.5;
- scene.add(vehicle);
- vehicleType = type;
+function makeEmojiSprite(emoji, size){
+ const canvas = document.createElement('canvas');
+ canvas.width=64; canvas.height=64;
+ const ctx=canvas.getContext('2d');
+ ctx.font="50px Arial"; ctx.textAlign="center"; ctx.textBaseline="middle";
+ ctx.fillText(emoji,32,32);
+ const texture=new THREE.CanvasTexture(canvas);
+ const material=new THREE.SpriteMaterial({map:texture});
+ const sprite=new THREE.Sprite(material);
+ sprite.scale.set(size,size,size);
+ return sprite;
 }
 
-// --- VEHICLE SWITCH ---
+// --- CREATE VEHICLE ---
+function createVehicle(emoji){
+ if(vehicle) scene.remove(vehicle);
+ vehicleEmoji=emoji;
+ const sprite = makeEmojiSprite(emoji, 10);
+ sprite.position.set(0,0.5,0);
+ scene.add(sprite);
+ vehicle = sprite;
+}
+
+// --- SWITCH VEHICLE ---
 function switchVehicle(){
  const select=document.getElementById("vehicleSelect");
  createVehicle(select.value);
 }
 
-// --- POLICE SPAWN & CHASE ---
-function spawnPolice(){
- policeCars=[]; let count=Math.floor(Math.random()*4)+1;
- for(let i=0;i<count;i++){
-   const p = new THREE.Mesh(
-     new THREE.BoxGeometry(2,1,4),
-     new THREE.MeshStandardMaterial({color:0x0000ff})
-   );
-   p.position.set((Math.random()-0.5)*80,0.5,(Math.random()-0.5)*80);
-   scene.add(p);
-   policeCars.push(p);
- }
- chaseTimer=0; policeActive=true;
-}
+// --- HUB STATIONS ---
+function goMaze(){document.getElementById("gameText").innerText="🧩 Entering Maze... (placeholder)";}
+function goBoard(){document.getElementById("gameText").innerText="♟️ Entering Board Games... (placeholder)";}
+function goStage(){document.getElementById("gameText").innerText="🎸 Entering Rock Stage... AI drums/piano placeholder";}
+function backHub(){document.getElementById("gameText").innerText="🏙️ Back to Hub";}
 
 // --- ANIMATE ---
 function animate(){
@@ -144,48 +140,21 @@ function animate(){
  let delta = clock.getDelta();
 
  vehicle.rotation.y += turn;
- vehicle.translateZ(speed);
+ vehicle.position.x += Math.sin(vehicle.rotation.y)*speed;
+ vehicle.position.z += Math.cos(vehicle.rotation.y)*speed;
 
- // Camera follow
+ // Camera follow behind vehicle
  camera.position.lerp(
    new THREE.Vector3(
-     vehicle.position.x+Math.sin(vehicle.rotation.y)*10,
+     vehicle.position.x + Math.sin(vehicle.rotation.y)*15,
      6,
-     vehicle.position.z+Math.cos(vehicle.rotation.y)*10
-   ),0.1
+     vehicle.position.z + Math.cos(vehicle.rotation.y)*15
+   ), 0.1
  );
  camera.lookAt(vehicle.position);
 
- updatePolice();
  renderer.render(scene,camera);
 }
-
-// --- UPDATE POLICE ---
-function updatePolice(){
- if(!policeActive) return;
- chaseTimer += 0.016;
- policeCars.forEach(p=>{
-   const dir=new THREE.Vector3().subVectors(vehicle.position,p.position).normalize();
-   p.position.add(dir.multiplyScalar(0.15));
-   p.lookAt(vehicle.position);
-   if(p.position.distanceTo(vehicle.position)<2){
-     alert("🚓 You got caught! Restarting...");
-     location.reload();
-   }
- });
- if(chaseTimer>30){
-   policeCars.forEach(p=>scene.remove(p));
-   policeCars=[];
-   policeActive=false;
-   setTimeout(spawnPolice,5000);
- }
-}
-
-// --- HUB STATIONS ---
-function goMaze(){document.getElementById("gameText").innerText="🧩 Entering Maze... (placeholder)";}
-function goBoard(){document.getElementById("gameText").innerText="♟️ Entering Board Games... (placeholder)";}
-function goStage(){document.getElementById("gameText").innerText="🎸 Entering Rock Stage... AI drums/piano sing now!";}
-function backHub(){document.getElementById("gameText").innerText="🏙️ Back to Hub";}
 
 </script>
 </body>
