@@ -36,11 +36,12 @@ let clock = new THREE.Clock();
 let emojiBuildings = [];
 let currentStation = null;
 
-// Stations coordinates
+// Hub and station positions
+const hubPos = {x:0, z:0};
 const stations = {
-  maze: {x:50, z:50, radius:7},
-  board: {x:-50, z:60, radius:7},
-  rock: {x:0, z:-70, radius:7}
+  maze: {x:100, z:0, radius:7},
+  board: {x:-100, z:50, radius:7},
+  rock: {x:0, z:-100, radius:7}
 };
 
 init();
@@ -73,6 +74,9 @@ function init(){
 
   createEmojiCity();
   createVehicle(vehicleEmoji);
+  createMaze();
+  createBoard();
+  createRockStage();
 
   document.addEventListener("keydown", e=>{switch(e.code){
     case "ArrowUp": case "KeyW": speed=0.5; break;
@@ -89,15 +93,59 @@ function init(){
   });
 }
 
-// --- CREATE CITY ---
+// --- CREATE HUB CITY ---
 function createEmojiCity(){
-  for(let i=0;i<20;i++){
+  for(let i=0;i<30;i++){
     const size = 50 + Math.random()*50;
     const sprite = makeEmojiSprite("🏙️", size);
     sprite.position.set((Math.random()-0.5)*200, size/2, (Math.random()-0.5)*200);
     scene.add(sprite);
     emojiBuildings.push(sprite);
   }
+}
+
+// --- CREATE MAZE ---
+let mazeWalls = [];
+function createMaze(){
+  const wallEmoji = "🟫";
+  for(let i=0;i<10;i++){
+    let wall = makeEmojiSprite(wallEmoji, 10);
+    wall.position.set(stations.maze.x + i*2,5,stations.maze.z + 0);
+    scene.add(wall);
+    mazeWalls.push(wall);
+  }
+  for(let i=0;i<10;i++){
+    let wall = makeEmojiSprite(wallEmoji, 10);
+    wall.position.set(stations.maze.x,5,stations.maze.z + i*2);
+    scene.add(wall);
+    mazeWalls.push(wall);
+  }
+}
+
+// --- CREATE BOARD AREA ---
+let boardPieces = [];
+function createBoard(){
+  const boardEmoji = "♟️";
+  for(let i=0;i<5;i++){
+    let piece = makeEmojiSprite(boardEmoji, 8);
+    piece.position.set(stations.board.x + i*2,0.5,stations.board.z);
+    scene.add(piece);
+    boardPieces.push(piece);
+  }
+}
+
+// --- CREATE ROCK STAGE ---
+let stageObjects = [];
+function createRockStage(){
+  const drum = makeEmojiSprite("🥁",10);
+  drum.position.set(stations.rock.x,0.5,stations.rock.z);
+  scene.add(drum);
+  stageObjects.push(drum);
+
+  const guitar = makeEmojiSprite("🎸",10);
+  guitar.position.set(stations.rock.x+5,0.5,stations.rock.z);
+  scene.add(guitar);
+  stageObjects.push(guitar);
 }
 
 // --- EMOJI SPRITE ---
@@ -121,7 +169,7 @@ function createVehicle(emoji){
   if(vehicle) scene.remove(vehicle);
   vehicleEmoji = emoji;
   const sprite = makeEmojiSprite(emoji, 10);
-  sprite.position.set(0,0.5,0);
+  sprite.position.set(hubPos.x,0.5,hubPos.z);
   scene.add(sprite);
   vehicle = sprite;
 }
@@ -142,14 +190,13 @@ function enterStation(name){
     case "rock": text="🎸 You entered Rock Stage!"; break;
   }
   document.getElementById("gameText").innerText = text;
-  // Move vehicle to station
   vehicle.position.set(stations[name].x,0.5,stations[name].z);
 }
 
 // --- BACK TO HUB ---
 function backHub(){
   currentStation = null;
-  vehicle.position.set(0,0.5,0);
+  vehicle.position.set(hubPos.x,0.5,hubPos.z);
   document.getElementById("gameText").innerText="🏙️ Back to Hub";
 }
 
