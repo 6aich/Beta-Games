@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>🚘 Beta Games 3D Emoji Hub</title>
+<title>🚘 Beta Games 3D World</title>
 <style>
-body { margin:0; overflow:hidden; background:skyblue; font-family:Arial; }
+body { margin:0; overflow:hidden; background:skyblue; }
 #ui { position:absolute; top:10px; left:10px; color:white; z-index:10;
      background:rgba(0,0,0,0.6); padding:10px; border-radius:10px; }
 button { font-size:16px; margin:2px; cursor:pointer; }
@@ -12,36 +12,27 @@ button { font-size:16px; margin:2px; cursor:pointer; }
 </style>
 </head>
 <body>
-
 <div id="ui">
-<select id="vehicleSelect">
-<option value="🚗">🚗 Car</option>
-<option value="✈️">✈️ Plane</option>
-<option value="🚀">🚀 Rocket</option>
-</select>
-<button onclick="switchVehicle()">Switch Vehicle</button>
 <button onclick="backHub()">🏙️ Back to Hub</button>
-<br><br>
-Controls: WASD / Arrow Keys
+<br>Controls: WASD / Arrow Keys
 </div>
 <div id="gameText">🏙️ Welcome to Beta Games!</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.157/build/three.min.js"></script>
 <script>
 
-// --- CORE THREE.JS SETUP ---
+// --- THREE.JS SETUP ---
 let scene, camera, renderer;
-let vehicle, vehicleEmoji="🚗", speed=0, turn=0;
+let vehicle, vehicleGroup;
+let speed=0, turn=0;
 let clock = new THREE.Clock();
-let emojiBuildings = [];
 let currentStation = null;
 
-// Hub and station positions
+// Hub and stations
 const hubPos = {x:0, z:0};
 const stations = {
-  maze: {x:100, z:0, radius:7},
-  board: {x:-100, z:50, radius:7},
-  rock: {x:0, z:-100, radius:7}
+  chess: {x:80, z:0, radius:7},
+  rock: {x:-80, z:50, radius:7}
 };
 
 init();
@@ -72,131 +63,143 @@ function init(){
   ground.rotation.x = -Math.PI/2;
   scene.add(ground);
 
-  createEmojiCity();
-  createVehicle(vehicleEmoji);
-  createMaze();
-  createBoard();
+  createCity();
+  createVehicle();
+  createChessArea();
   createRockStage();
 
-  document.addEventListener("keydown", e=>{switch(e.code){
-    case "ArrowUp": case "KeyW": speed=0.5; break;
-    case "ArrowDown": case "KeyS": speed=-0.3; break;
-    case "ArrowLeft": case "KeyA": turn=0.05; break;
-    case "ArrowRight": case "KeyD": turn=-0.05; break;
-  }});
+  document.addEventListener("keydown", e=>{
+    switch(e.code){
+      case "ArrowUp": case "KeyW": speed=0.5; break;
+      case "ArrowDown": case "KeyS": speed=-0.3; break;
+      case "ArrowLeft": case "KeyA": turn=0.05; break;
+      case "ArrowRight": case "KeyD": turn=-0.05; break;
+    }
+  });
   document.addEventListener("keyup", ()=>{speed=0; turn=0;});
 
   window.addEventListener("resize", ()=>{
-    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
   });
 }
 
-// --- CREATE HUB CITY ---
-function createEmojiCity(){
-  for(let i=0;i<30;i++){
-    const size = 50 + Math.random()*50;
-    const sprite = makeEmojiSprite("🏙️", size);
-    sprite.position.set((Math.random()-0.5)*200, size/2, (Math.random()-0.5)*200);
-    scene.add(sprite);
-    emojiBuildings.push(sprite);
+// --- CITY ---
+function createCity(){
+  for(let i=0;i<20;i++){
+    const h = 10 + Math.random()*30;
+    const b = 5 + Math.random()*10;
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(b,h,b),
+      new THREE.MeshStandardMaterial({color:0x888888})
+    );
+    box.position.set((Math.random()-0.5)*200,h/2,(Math.random()-0.5)*200);
+    scene.add(box);
+    // add windows
+    const winMat = new THREE.MeshStandardMaterial({color:0xffff00});
+    for(let y=1;y<h;y+=3){
+      for(let x=-b/2+1;x<b/2;x+=2){
+        const w = new THREE.Mesh(new THREE.BoxGeometry(0.8,0.8,0.1), winMat);
+        w.position.set(box.position.x + x, y, box.position.z + b/2 + 0.05);
+        scene.add(w);
+      }
+    }
   }
-}
-
-// --- CREATE MAZE ---
-let mazeWalls = [];
-function createMaze(){
-  const wallEmoji = "🟫";
-  for(let i=0;i<10;i++){
-    let wall = makeEmojiSprite(wallEmoji, 10);
-    wall.position.set(stations.maze.x + i*2,5,stations.maze.z + 0);
-    scene.add(wall);
-    mazeWalls.push(wall);
-  }
-  for(let i=0;i<10;i++){
-    let wall = makeEmojiSprite(wallEmoji, 10);
-    wall.position.set(stations.maze.x,5,stations.maze.z + i*2);
-    scene.add(wall);
-    mazeWalls.push(wall);
-  }
-}
-
-// --- CREATE BOARD AREA ---
-let boardPieces = [];
-function createBoard(){
-  const boardEmoji = "♟️";
-  for(let i=0;i<5;i++){
-    let piece = makeEmojiSprite(boardEmoji, 8);
-    piece.position.set(stations.board.x + i*2,0.5,stations.board.z);
-    scene.add(piece);
-    boardPieces.push(piece);
-  }
-}
-
-// --- CREATE ROCK STAGE ---
-let stageObjects = [];
-function createRockStage(){
-  const drum = makeEmojiSprite("🥁",10);
-  drum.position.set(stations.rock.x,0.5,stations.rock.z);
-  scene.add(drum);
-  stageObjects.push(drum);
-
-  const guitar = makeEmojiSprite("🎸",10);
-  guitar.position.set(stations.rock.x+5,0.5,stations.rock.z);
-  scene.add(guitar);
-  stageObjects.push(guitar);
-}
-
-// --- EMOJI SPRITE ---
-function makeEmojiSprite(emoji, size){
-  const canvas = document.createElement('canvas');
-  canvas.width = 256; canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  ctx.font = "200px Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(emoji, 128, 128);
-  const texture = new THREE.CanvasTexture(canvas);
-  const material = new THREE.SpriteMaterial({map: texture});
-  const sprite = new THREE.Sprite(material);
-  sprite.scale.set(size,size,size);
-  return sprite;
 }
 
 // --- VEHICLE ---
-function createVehicle(emoji){
-  if(vehicle) scene.remove(vehicle);
-  vehicleEmoji = emoji;
-  const sprite = makeEmojiSprite(emoji, 10);
-  sprite.position.set(hubPos.x,0.5,hubPos.z);
-  scene.add(sprite);
-  vehicle = sprite;
+function createVehicle(){
+  vehicleGroup = new THREE.Group();
+
+  // Body
+  const bodyMat = new THREE.MeshStandardMaterial({color:0xff0000});
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4,1.5,2), bodyMat);
+  body.position.y=1;
+  vehicleGroup.add(body);
+
+  // Windows (flat rectangles)
+  const winMat = new THREE.MeshStandardMaterial({color:0x00ffff});
+  const winFront = new THREE.Mesh(new THREE.BoxGeometry(1.5,0.8,0.05), winMat);
+  winFront.position.set(0,1.5,1.05);
+  vehicleGroup.add(winFront);
+
+  const winBack = new THREE.Mesh(new THREE.BoxGeometry(1.5,0.8,0.05), winMat);
+  winBack.position.set(0,1.5,-1.05);
+  vehicleGroup.add(winBack);
+
+  // Wheels
+  const wheelMat = new THREE.MeshStandardMaterial({color:0x222222});
+  const wheelGeom = new THREE.CylinderGeometry(0.5,0.5,0.5,16);
+  const positions = [
+    [1.5,0.5,1], [-1.5,0.5,1], [1.5,0.5,-1], [-1.5,0.5,-1]
+  ];
+  positions.forEach(p=>{
+    const w = new THREE.Mesh(wheelGeom, wheelMat);
+    w.rotation.z = Math.PI/2;
+    w.position.set(...p);
+    vehicleGroup.add(w);
+  });
+
+  vehicleGroup.position.set(hubPos.x,0,hubPos.z);
+  scene.add(vehicleGroup);
 }
 
-function switchVehicle(){
-  const select = document.getElementById("vehicleSelect");
-  createVehicle(select.value);
-}
-
-// --- ENTER STATION ---
-function enterStation(name){
-  if(currentStation) return;
-  currentStation = name;
-  let text="";
-  switch(name){
-    case "maze": text="🧩 You entered the Maze!"; break;
-    case "board": text="♟️ You entered Board Games!"; break;
-    case "rock": text="🎸 You entered Rock Stage!"; break;
+// --- CHESS AREA ---
+function createChessArea(){
+  const boardSize = 8;
+  const squareSize = 2;
+  for(let i=0;i<boardSize;i++){
+    for(let j=0;j<boardSize;j++){
+      const color = (i+j)%2===0?0xffffff:0x000000;
+      const square = new THREE.Mesh(
+        new THREE.BoxGeometry(squareSize,0.2,squareSize),
+        new THREE.MeshStandardMaterial({color})
+      );
+      square.position.set(stations.chess.x + i*squareSize,0.1,stations.chess.z + j*squareSize);
+      scene.add(square);
+    }
   }
-  document.getElementById("gameText").innerText = text;
-  vehicle.position.set(stations[name].x,0.5,stations[name].z);
+}
+
+// --- ROCK STAGE ---
+function createRockStage(){
+  const stage = new THREE.Mesh(
+    new THREE.BoxGeometry(12,1,8),
+    new THREE.MeshStandardMaterial({color:0x333333})
+  );
+  stage.position.set(stations.rock.x,0.5,stations.rock.z);
+  scene.add(stage);
+
+  // instruments (emoji planes)
+  const drum = makeEmojiSprite("🥁",3);
+  drum.position.set(stations.rock.x+2,1.5,stations.rock.z);
+  scene.add(drum);
+  const guitar = makeEmojiSprite("🎸",3);
+  guitar.position.set(stations.rock.x-2,1.5,stations.rock.z);
+  scene.add(guitar);
+}
+
+// --- EMOJI SPRITE ---
+function makeEmojiSprite(emoji,size){
+  const canvas = document.createElement('canvas');
+  canvas.width=256; canvas.height=256;
+  const ctx=canvas.getContext('2d');
+  ctx.font="200px Arial";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText(emoji,128,128);
+  const tex=new THREE.CanvasTexture(canvas);
+  const mat=new THREE.SpriteMaterial({map:tex});
+  const sprite=new THREE.Sprite(mat);
+  sprite.scale.set(size,size,size);
+  return sprite;
 }
 
 // --- BACK TO HUB ---
 function backHub(){
   currentStation = null;
-  vehicle.position.set(hubPos.x,0.5,hubPos.z);
+  vehicleGroup.position.set(hubPos.x,0,hubPos.z);
   document.getElementById("gameText").innerText="🏙️ Back to Hub";
 }
 
@@ -204,11 +207,12 @@ function backHub(){
 function checkStations(){
   if(currentStation) return;
   for(const [name,s] of Object.entries(stations)){
-    const dx = vehicle.position.x - s.x;
-    const dz = vehicle.position.z - s.z;
+    const dx = vehicleGroup.position.x - s.x;
+    const dz = vehicleGroup.position.z - s.z;
     const distance = Math.sqrt(dx*dx + dz*dz);
     if(distance < s.radius){
-      enterStation(name);
+      currentStation=name;
+      document.getElementById("gameText").innerText = name==="chess"?"♔♚ Chess Area":"🎸 Rock Stage";
     }
   }
 }
@@ -216,21 +220,21 @@ function checkStations(){
 // --- ANIMATE ---
 function animate(){
   requestAnimationFrame(animate);
-  let delta = clock.getDelta();
+  const delta = clock.getDelta();
 
-  vehicle.rotation.y += turn;
-  vehicle.position.x += Math.sin(vehicle.rotation.y)*speed;
-  vehicle.position.z += Math.cos(vehicle.rotation.y)*speed;
+  vehicleGroup.rotation.y += turn;
+  vehicleGroup.position.x += Math.sin(vehicleGroup.rotation.y)*speed;
+  vehicleGroup.position.z += Math.cos(vehicleGroup.rotation.y)*speed;
 
   // Camera follow
   camera.position.lerp(
     new THREE.Vector3(
-      vehicle.position.x + Math.sin(vehicle.rotation.y)*15,
+      vehicleGroup.position.x + Math.sin(vehicleGroup.rotation.y)*15,
       6,
-      vehicle.position.z + Math.cos(vehicle.rotation.y)*15
+      vehicleGroup.position.z + Math.cos(vehicleGroup.rotation.y)*15
     ), 0.1
   );
-  camera.lookAt(vehicle.position);
+  camera.lookAt(vehicleGroup.position);
 
   checkStations();
 
