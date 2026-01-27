@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fun Games</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
+  h1 { margin-top: 10px; }
+  button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+  .game { display: none; margin-top: 20px; }
+  .board { display: grid; gap: 5px; margin: 0 auto; }
+  .cell { background: #fff; border: 1px solid #000; display: flex; align-items: center; justify-content: center; font-size: 2em; cursor: pointer; }
+  #snake-board { grid-template-columns: repeat(10, 50px); grid-template-rows: repeat(10, 50px); }
+  #monopoly-board { display: flex; flex-wrap: wrap; width: 500px; margin: 0 auto; }
+  .monopoly-cell { width: 60px; height: 60px; border: 1px solid #000; display:flex; align-items:center; justify-content:center; font-size:0.8em; margin:1px; }
+  .uno-hand { display:flex; justify-content:center; margin:10px; }
+  .uno-card { width:50px; height:70px; border:1px solid #000; margin:5px; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<h1>Fun Games Hub</h1>
+<div>
+  <button onclick="showGame('xo')">Tic Tac Toe</button>
+  <button onclick="showGame('snake')">Snakes & Ladders 🐍🪜</button>
+  <button onclick="showGame('monopoly')">Monopoly</button>
+  <button onclick="showGame('uno')">UNO</button>
+</div>
+
+<!-- TIC TAC TOE -->
+<div id="xo" class="game">
+  <h2>Tic Tac Toe</h2>
+  <div id="xo-board" class="board" style="grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px);"></div>
+  <p id="xo-status"></p>
+  <button onclick="initXO()">Restart XO</button>
+</div>
+
+<!-- SNAKES & LADDERS -->
+<div id="snake" class="game">
+  <h2>Snakes & Ladders 🐍🪜</h2>
+  <div id="snake-board"></div>
+  <p id="snake-status"></p>
+  <button onclick="initSnake()">Restart Snakes & Ladders</button>
+</div>
+
+<!-- MONOPOLY -->
+<div id="monopoly" class="game">
+  <h2>Monopoly (Simplified)</h2>
+  <div id="monopoly-board"></div>
+  <p id="monopoly-status"></p>
+  <button onclick="initMonopoly()">Restart Monopoly</button>
+</div>
+
+<!-- UNO -->
+<div id="uno" class="game">
+  <h2>UNO (Simplified 2-player)</h2>
+  <div id="uno-discard">Discard pile: <span id="discard-card">None</span></div>
+  <div id="uno-hands"></div>
+  <p id="uno-status"></p>
+  <button onclick="initUNO()">Restart UNO</button>
+</div>
+
+<script>
+// ------------------------ GAME SWITCH ------------------------
+function showGame(id) {
+  document.querySelectorAll('.game').forEach(g => g.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+// ------------------------ TIC TAC TOE ------------------------
+let xoBoard = [];
+let xoTurn = 'X';
+function initXO() {
+  xoBoard = ['', '', '', '', '', '', '', '', ''];
+  xoTurn = 'X';
+  const board = document.getElementById('xo-board');
+  board.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.addEventListener('click', () => xoClick(i));
+    board.appendChild(cell);
+  }
+  document.getElementById('xo-status').innerText = "Turn: X";
+}
+function xoClick(i) {
+  if (xoBoard[i]==='') {
+    xoBoard[i]=xoTurn;
+    document.getElementById('xo-board').children[i].innerText=xoTurn;
+    if(checkXO()){
+      document.getElementById('xo-status').innerText = xoTurn + " Wins!";
+      return;
+    }
+    if(!xoBoard.includes('')){
+      document.getElementById('xo-status').innerText = "Draw!";
+      return;
+    }
+    xoTurn = xoTurn==='X'?'O':'X';
+    document.getElementById('xo-status').innerText = "Turn: "+xoTurn;
+  }
+}
+function checkXO() {
+  const winCombos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return winCombos.some(c=>c.every(i=>xoBoard[i]===xoTurn));
+}
+initXO();
+
+// ------------------------ SNAKES & LADDERS ------------------------
+let snakePlayer = 0;
+let snakePositions = [0,0];
+const snakeLadders = {3:22,5:8,11:26,20:29,17:4,19:7,21:9,27:1};
+function initSnake() {
+  snakePlayer=0;
+  snakePositions=[0,0];
+  const board = document.getElementById('snake-board');
+  board.innerHTML='';
+  for(let i=100;i>=1;i--){
+    const cell = document.createElement('div');
+    cell.className='cell';
+    let text=i;
+    if(snakeLadders[i]>i) text+='🪜';
+    if(snakeLadders[i]<i) text+='🐍';
+    cell.innerText=text;
+    board.appendChild(cell);
+  }
+  document.getElementById('snake-status').innerText='Player 1 Turn';
+}
+function rollDice() {
+  const roll=Math.floor(Math.random()*6)+1;
+  snakePositions[snakePlayer]+=roll;
+  if(snakeLadders[snakePositions[snakePlayer]]) snakePositions[snakePlayer]=snakeLadders[snakePositions[snakePlayer]];
+  if(snakePositions[snakePlayer]>=100){
+    document.getElementById('snake-status').innerText='Player '+(snakePlayer+1)+' Wins!';
+    return;
+  }
+  snakePlayer=1-snakePlayer;
+  document.getElementById('snake-status').innerText='Player '+(snakePlayer+1)+' Turn (Roll Dice)';
+}
+document.getElementById('snake-status').addEventListener('click',rollDice);
+initSnake();
+
+// ------------------------ MONOPOLY ------------------------
+let monoPlayer=0;
+let monoPositions=[0,0];
+let monoMoney=[1500,1500];
+function initMonopoly() {
+  monoPlayer=0; monoPositions=[0,0]; monoMoney=[1500,1500];
+  const board=document.getElementById('monopoly-board');
+  board.innerHTML='';
+  for(let i=0;i<20;i++){
+    const cell=document.createElement('div');
+    cell.className='monopoly-cell';
+    cell.innerText='P'+i;
+    board.appendChild(cell);
+  }
+  document.getElementById('monopoly-status').innerText='Player 1 Turn';
+}
+function monoRoll(){
+  const roll=Math.floor(Math.random()*6)+1;
+  monoPositions[monoPlayer]=(monoPositions[monoPlayer]+roll)%20;
+  monoMoney[monoPlayer]-=10; // simplified rent
+  if(monoMoney[monoPlayer]<=0){
+    document.getElementById('monopoly-status').innerText='Player '+(monoPlayer+1)+' loses!';
+    return;
+  }
+  monoPlayer=1-monoPlayer;
+  document.getElementById('monopoly-status').innerText='Player '+(monoPlayer+1)+' Turn';
+}
+document.getElementById('monopoly-status').addEventListener('click',monoRoll);
+initMonopoly();
+
+// ------------------------ UNO ------------------------
+let unoDeck=[],unoHands=[],discardCard,unoPlayer;
+function initUNO() {
+  unoDeck=[];
+  ['R','G','B','Y'].forEach(c=>{
+    for(let i=0;i<10;i++) unoDeck.push(c+i);
+  });
+  shuffle(unoDeck);
+  unoHands=[unoDeck.splice(0,5),unoDeck.splice(0,5)];
+  discardCard=unoDeck.pop();
+  unoPlayer=0;
+  renderUNO();
+  document.getElementById('uno-status').innerText='Player 1 Turn';
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+function renderUNO(){
+  document.getElementById('discard-card').innerText=discardCard;
+  const handsDiv=document.getElementById('uno-hands');
+  handsDiv.innerHTML='';
+  unoHands.forEach((hand,i)=>{
+    const handDiv=document.createElement('div');
+    handDiv.className='uno-hand';
+    hand.forEach((card,j)=>{
+      const c=document.createElement('div');
+      c.className='uno-card';
+      c.style.backgroundColor=card[0].toLowerCase();
+      c.innerText=card.slice(1);
+      c.addEventListener('click',()=>playUNO(i,j));
+      handDiv.appendChild(c);
+    });
+    handsDiv.appendChild(handDiv);
+  });
+}
+function playUNO(player,index){
+  if(player!==unoPlayer) return;
+  const card=unoHands[player][index];
+  if(card[0]===discardCard[0] || card.slice(1)===discardCard.slice(1)){
+    discardCard=unoHands[player].splice(index,1)[0];
+    if(unoHands[player].length===0){
+      document.getElementById('uno-status').innerText='Player '+(player+1)+' Wins!';
+      renderUNO();
+      return;
+    }
+    unoPlayer=1-unoPlayer;
+    document.getElementById('uno-status').innerText='Player '+(unoPlayer+1)+' Turn';
+    renderUNO();
+  }
+}
+initUNO();
+</script>
+
+<p>Click on dice/rent/status text for actions in Snakes & Ladders & Monopoly.</p>
+</body>
+</html>
