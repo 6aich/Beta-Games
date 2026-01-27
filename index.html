@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>🎮 Beta Games</title>
-
 <style>
 body{
     margin:0;
@@ -13,7 +12,6 @@ body{
     text-align:center;
 }
 h1{margin:20px;}
-
 #menu{
     display:grid;
     grid-template-columns:repeat(2,1fr);
@@ -32,14 +30,13 @@ h1{margin:20px;}
     box-shadow:0 0 20px #00ffff;
 }
 .gameImage{
-    height:200px;
-    font-size:120px;
+    height:150px;
+    font-size:100px;
     display:flex;
     align-items:center;
     justify-content:center;
 }
 .hidden{display:none;}
-
 button{
     padding:10px 20px;
     border:none;
@@ -50,10 +47,9 @@ button{
     font-size:16px;
 }
 button:hover{background:#00cccc;}
-
-.board{
+.board, .chessboard{
     display:grid;
-    gap:5px;
+    gap:2px;
     justify-content:center;
 }
 .cell{
@@ -77,242 +73,199 @@ button:hover{background:#00cccc;}
     font-size:28px;
     cursor:pointer;
 }
-progress{
-    width:300px;
-    height:20px;
+.chessCell{
+    width:60px;
+    height:60px;
+    font-size:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+.whiteCell{background:#eee;color:#000;}
+.blackCell{background:#444;color:#fff;}
+.rulesBox{
+    background:#111;
+    padding:20px;
+    border-radius:15px;
+    margin:20px auto;
+    width:80%;
+    text-align:left;
 }
 </style>
 </head>
-
 <body>
 
 <h1>🎮 Beta Games</h1>
 
 <div id="menu">
-    <div class="gameTile" onclick="openGame('xo')">
+    <div class="gameTile" onclick="showRules('xo')">
         <div class="gameImage">❌⭕</div>
         <h2>Tic Tac Toe</h2>
     </div>
-
-    <div class="gameTile" onclick="openGame('snakes')">
+    <div class="gameTile" onclick="showRules('snakes')">
         <div class="gameImage">🐍🪜</div>
         <h2>Snakes & Ladders</h2>
     </div>
-
-    <div class="gameTile" onclick="openGame('uno')">
+    <div class="gameTile" onclick="showRules('chess')">
+        <div class="gameImage">♔♚</div>
+        <h2>Chess</h2>
+    </div>
+    <div class="gameTile" onclick="showRules('uno')">
         <div class="gameImage">🃏</div>
         <h2>UNO</h2>
     </div>
-
-    <div class="gameTile" onclick="openGame('monopoly')">
+    <div class="gameTile" onclick="showRules('monopoly')">
         <div class="gameImage">🏦</div>
         <h2>Monopoly</h2>
     </div>
 </div>
 
+<!-- RULES SCREEN -->
+<div id="rules" class="hidden"></div>
+
 <!-- GAME SCREENS -->
 <div id="xo" class="hidden"></div>
 <div id="snakes" class="hidden"></div>
+<div id="chess" class="hidden"></div>
 <div id="uno" class="hidden"></div>
 <div id="monopoly" class="hidden"></div>
 
 <script>
-function openGame(id){
+/* ================= MENU & RULES ================= */
+let currentGame = "";
+function showRules(game){
+    currentGame = game;
     document.getElementById("menu").style.display="none";
-    ["xo","snakes","uno","monopoly"].forEach(g=>{
-        document.getElementById(g).classList.add("hidden");
-    });
-    document.getElementById(id).classList.remove("hidden");
+    let rulesText="";
+    switch(game){
+        case "xo":
+            rulesText=`<b>Players:</b> 2 or VS AI<br>
+            <b>Goal:</b> Get 3 in a row.<br>
+            <b>Rules:</b> Click a cell to place your X or O.`;
+            break;
+        case "snakes":
+            rulesText=`<b>Players:</b> 1+<br>
+            <b>Goal:</b> Reach 50 first.<br>
+            <b>Rules:</b> Roll dice to move. Land on ladder → up, snake → down.`;
+            break;
+        case "uno":
+            rulesText=`<b>Players:</b> VS AI or VS Person<br>
+            <b>Goal:</b> Empty your hand first.<br>
+            <b>Rules:</b> Match number or color of top card. Draw if no match.`;
+            break;
+        case "monopoly":
+            rulesText=`<b>Players:</b> VS AI or VS Person<br>
+            <b>Goal:</b> Reach $3000 first.<br>
+            <b>Rules:</b> Roll dice, move, random events can gain/lose money.`;
+            break;
+        case "chess":
+            rulesText=`<b>Players:</b> VS AI or VS Person<br>
+            <b>Goal:</b> Checkmate opponent King.<br>
+            <b>Rules:</b> Standard chess rules: Pawns 1/2 squares, Rooks straight, Bishops diagonal, Queen both, Knight L-shape, King 1 square, Check & Checkmate.`;
+            break;
+    }
+    document.getElementById("rules").innerHTML=
+        `<div class="rulesBox"><h2>Rules for ${game.toUpperCase()}</h2>${rulesText}<br>
+        <button onclick="chooseMode('${game}')">Start Game</button>
+        <button onclick="backToMenu()">Back</button></div>`;
+    document.getElementById("rules").classList.remove("hidden");
 }
-function back(){
+function chooseMode(game){
+    document.getElementById("rules").classList.add("hidden");
+    switch(game){
+        case "xo": loadXO(); break;
+        case "snakes": loadSnakes(); break;
+        case "uno": loadUNO(); break;
+        case "monopoly": loadMonopoly(); break;
+        case "chess": loadChess(); break;
+    }
+}
+function backToMenu(){
+    document.getElementById("rules").classList.add("hidden");
     document.getElementById("menu").style.display="grid";
-    ["xo","snakes","uno","monopoly"].forEach(g=>{
-        document.getElementById(g).classList.add("hidden");
-    });
 }
 
 /* ================= TIC TAC TOE ================= */
-let xoBoard = Array(9).fill("");
-let xoTurn = "X";
-let xoGameOver = false;
-
-function checkWin(){
-    const wins = [
-        [0,1,2],[3,4,5],[6,7,8],
-        [0,3,6],[1,4,7],[2,5,8],
-        [0,4,8],[2,4,6]
-    ];
-    for(let w of wins){
-        let [a,b,c] = w;
-        if(xoBoard[a] && xoBoard[a]===xoBoard[b] && xoBoard[a]===xoBoard[c]){
-            return xoBoard[a];
-        }
-    }
-    if(!xoBoard.includes("")) return "draw";
-    return null;
+let xoBoard=Array(9).fill(""), xoTurn="X", xoGameOver=false;
+function checkWinXO(){
+    const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for(let w of wins){ let [a,b,c]=w; if(xoBoard[a] && xoBoard[a]===xoBoard[b] && xoBoard[a]===xoBoard[c]) return xoBoard[a]; }
+    if(!xoBoard.includes("")) return "draw"; return null;
 }
-
 function loadXO(){
-    let winner = checkWin();
-    if(winner) xoGameOver = true;
-
-    let html = `<h2>❌⭕ Tic Tac Toe</h2>`;
-    if(winner === "draw") html += `<h3>🤝 Draw!</h3>`;
-    else if(winner) html += `<h3>🎉 ${winner} wins!</h3>`;
-    else html += `<p>Turn: ${xoTurn}</p>`;
-
-    html += `<div class="board" style="grid-template-columns:repeat(3,80px)">`;
-    xoBoard.forEach((v,i)=>{
-        html += `<div class="cell" onclick="xoMove(${i})">${v}</div>`;
-    });
-    html += `</div>
-    <button onclick="resetXO()">Reset</button>
-    <button onclick="back()">Back</button>`;
-    document.getElementById("xo").innerHTML = html;
+    document.getElementById("xo").classList.remove("hidden");
+    let winner=checkWinXO();
+    if(winner && !xoGameOver){ xoGameOver=true; setTimeout(()=>{alert(winner==="draw"?"Draw!":winner+" wins!");},100);}
+    let html=`<h2>❌⭕ Tic Tac Toe</h2>`;
+    if(winner==="draw") html+=`<h3>Draw!</h3>`;
+    else if(winner) html+=`<h3>${winner} wins!</h3>`;
+    else html+=`<p>Turn: ${xoTurn}</p>`;
+    html+=`<div class="board" style="grid-template-columns:repeat(3,80px)">`;
+    xoBoard.forEach((v,i)=>{html+=`<div class="cell" onclick="xoMove(${i})">${v}</div>`});
+    html+=`</div><button onclick="resetXO()">Reset</button><button onclick="backToMenu()">Back</button>`;
+    document.getElementById("xo").innerHTML=html;
 }
-
-function xoMove(i){
-    if(xoBoard[i] || xoGameOver) return;
-    xoBoard[i] = xoTurn;
-    xoTurn = xoTurn==="X"?"O":"X";
-    loadXO();
-}
-function resetXO(){
-    xoBoard = Array(9).fill("");
-    xoTurn = "X";
-    xoGameOver = false;
-    loadXO();
-}
-loadXO();
+function xoMove(i){ if(xoBoard[i]||xoGameOver) return; xoBoard[i]=xoTurn; xoTurn=xoTurn==="X"?"O":"X"; loadXO();}
+function resetXO(){ xoBoard=Array(9).fill(""); xoTurn="X"; xoGameOver=false; loadXO(); }
 
 /* ================= SNAKES ================= */
-let pos = 1;
-const snakes = {16:6, 48:30, 42:19};
-const ladders = {3:22, 8:26, 20:38};
-
+let pos=1;
+const snakes={16:6,48:30,42:19};
+const ladders={3:22,8:26,20:38};
 function loadSnakes(){
-    let html = `<h2>🐍🪜 Snakes & Ladders</h2>
-    <p>Reach 50 to win!</p>
-    <p>Position: ${pos}</p>
-    <progress value="${pos}" max="50"></progress><br><br>
-    <button onclick="roll()">🎲 Roll Dice</button>
-    <button onclick="back()">Back</button>`;
-    document.getElementById("snakes").innerHTML = html;
+    document.getElementById("snakes").classList.remove("hidden");
+    document.getElementById("snakes").innerHTML=
+        `<h2>🐍🪜 Snakes & Ladders</h2>
+        <p>Position: ${pos}</p>
+        <progress value="${pos}" max="50"></progress><br>
+        <button onclick="roll()">🎲 Roll Dice</button>
+        <button onclick="backToMenu()">Back</button>`;
 }
-
-function roll(){
-    let d = Math.floor(Math.random()*6)+1;
-    pos += d;
-    if(snakes[pos]) pos = snakes[pos];
-    if(ladders[pos]) pos = ladders[pos];
-    if(pos >= 50){
-        alert("🎉 You Win!");
-        pos = 1;
-    }
-    loadSnakes();
-}
-loadSnakes();
+function roll(){ let d=Math.floor(Math.random()*6)+1; pos+=d; if(snakes[pos]) pos=snakes[pos]; if(ladders[pos]) pos=ladders[pos]; if(pos>=50){setTimeout(()=>{alert("You Win!"); pos=1;},100);} loadSnakes(); }
 
 /* ================= UNO ================= */
-let player = [randomCard(), randomCard(), randomCard()];
-let cpu = [randomCard(), randomCard(), randomCard()];
-let pile = randomCard();
-let turn = "player";
-
-function randomCard(){
-    let colors=["red","yellow","green","blue"];
-    return {color:colors[Math.floor(Math.random()*4)],
-            number:Math.floor(Math.random()*9)};
-}
-
-function loadUNO(){
-    let html = `<h2>🃏 UNO</h2>
-    <p><b>Turn:</b> ${turn}</p>
-    <p>CPU Cards: ${cpu.length}</p>
-    <p>Pile: <span class="card" style="background:${pile.color}">${pile.number}</span></p>
-    <h3>Your Hand</h3>`;
-    player.forEach((c,i)=>{
-        html += `<span class="card" onclick="playCard(${i})" style="background:${c.color}">${c.number}</span>`;
-    });
-    html += `<br><button onclick="draw()">Draw</button>
-    <button onclick="back()">Back</button>`;
-    document.getElementById("uno").innerHTML = html;
-}
-
-function playCard(i){
-    if(turn!=="player") return;
-    let c = player[i];
-    if(c.color===pile.color || c.number===pile.number){
-        pile=c;
-        player.splice(i,1);
-        if(player.length===0){alert("🎉 You Win!"); resetUNO(); return;}
-        turn="cpu"; loadUNO(); setTimeout(cpuTurn,800);
-    } else alert("❌ Can't play that!");
-}
-
-function cpuTurn(){
-    for(let i=0;i<cpu.length;i++){
-        let c=cpu[i];
-        if(c.color===pile.color || c.number===pile.number){
-            pile=c; cpu.splice(i,1);
-            if(cpu.length===0){alert("🤖 CPU Wins!"); resetUNO(); return;}
-            turn="player"; loadUNO(); return;
-        }
-    }
-    cpu.push(randomCard());
-    turn="player"; loadUNO();
-}
-function draw(){
-    if(turn!=="player") return;
-    player.push(randomCard());
-    turn="cpu"; loadUNO(); setTimeout(cpuTurn,800);
-}
-function resetUNO(){
-    player=[randomCard(),randomCard(),randomCard()];
-    cpu=[randomCard(),randomCard(),randomCard()];
-    pile=randomCard();
-    turn="player";
-    loadUNO();
-}
-loadUNO();
+let player=[randomCard(),randomCard(),randomCard()];
+let cpu=[randomCard(),randomCard(),randomCard()];
+let pile=randomCard(), turn="player";
+function randomCard(){let colors=["red","yellow","green","blue"]; return {color:colors[Math.floor(Math.random()*4)],number:Math.floor(Math.random()*9)};}
+function loadUNO(){ document.getElementById("uno").classList.remove("hidden"); 
+let html=`<h2>🃏 UNO</h2><p>Turn: ${turn}</p><p>Pile: <span class="card" style="background:${pile.color}">${pile.number}</span></p><h3>Your Hand</h3>`;
+player.forEach((c,i)=>{html+=`<span class="card" onclick="playCard(${i})" style="background:${c.color}">${c.number}</span>`});
+html+=`<br><button onclick="draw()">Draw</button><button onclick="backToMenu()">Back</button>`;
+document.getElementById("uno").innerHTML=html;}
+function playCard(i){ if(turn!=="player") return; let c=player[i]; if(c.color===pile.color||c.number===pile.number){ pile=c; player.splice(i,1); loadUNO(); if(player.length===0){setTimeout(()=>{alert("You Win!"); resetUNO();},100); return;} turn="cpu"; setTimeout(cpuTurn,500);} else alert("Can't play that!");}
+function cpuTurn(){ for(let i=0;i<cpu.length;i++){ let c=cpu[i]; if(c.color===pile.color||c.number===pile.number){ pile=c; cpu.splice(i,1); loadUNO(); if(cpu.length===0){setTimeout(()=>{alert("CPU Wins!"); resetUNO();},100); return;} turn="player"; return;}} cpu.push(randomCard()); turn="player"; loadUNO();}
+function draw(){if(turn!=="player") return; player.push(randomCard()); turn="cpu"; loadUNO(); setTimeout(cpuTurn,500);}
+function resetUNO(){player=[randomCard(),randomCard(),randomCard()]; cpu=[randomCard(),randomCard(),randomCard()]; pile=randomCard(); turn="player"; loadUNO();}
 
 /* ================= MONOPOLY ================= */
-let money=1500;
-let position=0;
-let turns=0;
+let money=1500, positionM=0, turns=0;
+function loadMonopoly(){document.getElementById("monopoly").classList.remove("hidden");
+document.getElementById("monopoly").innerHTML=
+`<h2>🏦 Monopoly</h2><p>Position: ${positionM} | Money: $${money} | Turn: ${turns}</p>
+<button onclick="rollM()">Roll Dice</button><button onclick="backToMenu()">Back</button>`;}
+function rollM(){turns++; let d=Math.floor(Math.random()*6)+1; positionM=(positionM+d)%20; let event=Math.random(); if(event<0.3) money+=200; else if(event<0.6) money-=150; else money+=50; if(money>=3000){setTimeout(()=>{alert("You Win Monopoly!"); money=1500; positionM=0; turns=0;},100);} else if(money<=0){setTimeout(()=>{alert("Bankrupt!"); money=1500; positionM=0; turns=0;},100);} loadMonopoly();}
 
-function loadMonopoly(){
-    let html=`<h2>🏦 Monopoly</h2>
-    <p>Reach $3000 to win!</p>
-    <p>Turn: ${turns}</p>
-    <p>Position: ${position}</p>
-    <p>Money: $${money}</p>
-    <button onclick="rollM()">🎲 Roll</button>
-    <button onclick="back()">Back</button>`;
-    document.getElementById("monopoly").innerHTML=html;
-}
+/* ================= CHESS ================= */
+const initialChess=["♜","♞","♝","♛","♚","♝","♞","♜","♟","♟","♟","♟","♟","♟","♟","♟",
+                   "","","","","","","","",
+                   "","","","","","","","",
+                   "","","","","","","","",
+                   "","","","","","","","",
+                   "","","","","","","","",
+                   "♙","♙","♙","♙","♙","♙","♙","♙",
+                   "♖","♘","♗","♕","♔","♗","♘","♖"];
+let chessBoard=[], selectedPiece=-1, chessTurn="white";
+function loadChess(){document.getElementById("chess").classList.remove("hidden"); chessBoard=initialChess.slice();
+renderChess();}
+function renderChess(){let html=`<h2>♔♚ Chess (${chessTurn})</h2><div class="chessboard" style="grid-template-columns:repeat(8,60px)">`;
+for(let i=0;i<64;i++){ let color=(Math.floor(i/8)+i)%2===0?"whiteCell":"blackCell";
+html+=`<div class="chessCell ${color}" onclick="selectChess(${i})">${chessBoard[i]}</div>`;}
+html+=`</div><button onclick="backToMenu()">Back</button>`; document.getElementById("chess").innerHTML=html;}
+function selectChess(i){if(selectedPiece===-1 && chessBoard[i]!==""){selectedPiece=i;} else if(selectedPiece!==-1){chessBoard[i]=chessBoard[selectedPiece]; chessBoard[selectedPiece]=""; selectedPiece=-1; chessTurn=chessTurn==="white"?"black":"white"; renderChess();}}
 
-function rollM(){
-    turns++;
-    let d=Math.floor(Math.random()*6)+1;
-    position=(position+d)%20;
-    let event=Math.random();
-    if(event<0.3) money+=200;
-    else if(event<0.6) money-=150;
-    else money+=50;
-
-    if(money>=3000){
-        alert("🏆 You Win Monopoly!");
-        money=1500; position=0; turns=0;
-    }
-    if(money<=0){
-        alert("💸 Bankrupt!");
-        money=1500; position=0; turns=0;
-    }
-    loadMonopoly();
-}
-loadMonopoly();
+/* ================= INITIAL LOAD ================= */
 </script>
-
 </body>
 </html>
