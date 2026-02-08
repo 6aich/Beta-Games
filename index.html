@@ -1,57 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Beta Game Login</title>
+<title>Beta Game</title>
 <style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#111;
-  font-family:Arial;
-  color:white;
-}
-.box{
-  background:#222;
-  padding:30px;
-  border-radius:12px;
-  text-align:center;
-}
-input{
-  padding:10px;
-  width:200px;
-  border-radius:8px;
-  border:none;
-}
-button{
-  margin-top:15px;
-  padding:10px 25px;
-  border:none;
-  border-radius:8px;
-  background:#4fc3f7;
-  font-size:16px;
-  cursor:pointer;
-}
+  body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
+  /* Login Page */
+  #loginPage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #f5a623, #f76b1c);
+    flex-direction: column;
+  }
+  #loginPage button {
+    padding: 15px 30px;
+    font-size: 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  /* Play Page */
+  #playPage {
+    display: none;
+    height: 100vh;
+    width: 100%;
+    background: linear-gradient(to bottom, #a0eaff, #ffffff);
+    justify-content: center;
+    align-items: center;
+  }
+  #playPage button {
+    padding: 15px 40px;
+    font-size: 24px;
+    border-radius: 15px;
+    border: none;
+    background-color: #87CEFA; /* light blue */
+    cursor: pointer;
+  }
+
+  /* Game Page */
+  #gamePage {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: url('https://i.imgur.com/8iYvIhL.png') repeat-x; /* example Maori background */
+    background-size: cover;
+    overflow: hidden;
+  }
+
+  /* Maori Character */
+  #maori {
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    width: 60px;
+    height: 80px;
+    background: url('https://i.imgur.com/3qPqQ7D.png') no-repeat center/contain;
+  }
+
+  /* Points */
+  #points {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    color: white;
+    font-weight: bold;
+  }
+
+  /* Collectibles */
+  .point {
+    position: absolute;
+    width: 30px; height: 30px;
+    background: gold;
+    border-radius: 50%;
+  }
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h1>Website</h1>
-  <h2>Beta Game</h2>
-  <input id="name" placeholder="Username">
-  <br>
-  <button onclick="go()">Login</button>
+<!-- Login Page -->
+<div id="loginPage">
+  <h1>Welcome to Beta Game</h1>
+  <button onclick="goToPlay()">Login</button>
+</div>
+
+<!-- Play Page -->
+<div id="playPage">
+  <button onclick="startGame()">Play</button>
+</div>
+
+<!-- Game Page -->
+<div id="gamePage">
+  <div id="points">Points: 0</div>
+  <div id="maori"></div>
 </div>
 
 <script>
-function go(){
-  localStorage.setItem("player", document.getElementById("name").value);
-  window.location.href="play.html";
-}
+  let score = 0;
+
+  function goToPlay() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('playPage').style.display = 'flex';
+  }
+
+  function startGame() {
+    document.getElementById('playPage').style.display = 'none';
+    document.getElementById('gamePage').style.display = 'block';
+    spawnPoint();
+  }
+
+  const maori = document.getElementById('maori');
+  const gamePage = document.getElementById('gamePage');
+
+  // Character movement
+  let positionX = 50;
+  let positionY = 50;
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowRight') positionX += 20;
+    if(e.key === 'ArrowLeft') positionX -= 20;
+    if(e.key === 'ArrowUp') positionY -= 20;
+    if(e.key === 'ArrowDown') positionY += 20;
+
+    // keep inside screen
+    positionX = Math.max(0, Math.min(window.innerWidth-60, positionX));
+    positionY = Math.max(0, Math.min(window.innerHeight-80, positionY));
+
+    maori.style.left = positionX + 'px';
+    maori.style.bottom = positionY + 'px';
+
+    checkCollision();
+  });
+
+  function spawnPoint() {
+    const point = document.createElement('div');
+    point.classList.add('point');
+    point.style.left = Math.random() * (window.innerWidth-30) + 'px';
+    point.style.top = Math.random() * (window.innerHeight-30) + 'px';
+    gamePage.appendChild(point);
+  }
+
+  function checkCollision() {
+    const pointsElements = document.querySelectorAll('.point');
+    pointsElements.forEach(point => {
+      const rect1 = maori.getBoundingClientRect();
+      const rect2 = point.getBoundingClientRect();
+      if(!(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom)){
+        point.remove();
+        score += 10;
+        document.getElementById('points').innerText = 'Points: ' + score;
+        spawnPoint();
+      }
+    });
+  }
 </script>
 
 </body>
