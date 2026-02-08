@@ -1,95 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Beta Game – Login</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-
-    .login-box {
-      background: rgba(0,0,0,0.6);
-      padding: 30px;
-      border-radius: 15px;
-      width: 320px;
-      text-align: center;
-      box-shadow: 0 0 20px #000;
-    }
-
-    h1 {
-      margin: 5px 0;
-      font-size: 28px;
-    }
-
-    h2 {
-      margin: 5px 0 20px;
-      font-size: 18px;
-      color: #00e5ff;
-    }
-
-    img {
-      width: 280px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-
-    input {
-      width: 90%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-
-    button {
-      width: 95%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      background: #00e5ff;
-      color: black;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #00bcd4;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Beta Game Login</title>
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#111;
+  font-family:Arial;
+  color:white;
+}
+.box{
+  background:#222;
+  padding:30px;
+  border-radius:12px;
+  text-align:center;
+}
+input{
+  padding:10px;
+  width:200px;
+  border-radius:8px;
+  border:none;
+}
+button{
+  margin-top:15px;
+  padding:10px 25px;
+  border:none;
+  border-radius:8px;
+  background:#4fc3f7;
+  font-size:16px;
+  cursor:pointer;
+}
+</style>
 </head>
 <body>
 
-  <div class="login-box">
-    <h1>Website</h1>
-    <h2>Beta Game</h2>
+<div class="box">
+  <h1>Website</h1>
+  <h2>Beta Game</h2>
+  <input id="name" placeholder="Username">
+  <br>
+  <button onclick="go()">Login</button>
+</div>
 
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQofczx-zaZw7J3zNj0dStl-d0OvWi1LTY7Kw&s">
-
-    <input id="username" placeholder="Enter username">
-    <button onclick="login()">Login</button>
-  </div>
-
-  <script>
-    function login() {
-      const user = document.getElementById("username").value;
-      if (user.trim() === "") {
-        alert("Please enter a username");
-        return;
-      }
-      localStorage.setItem("player", user);
-      window.location.href = "game.html";
-    }
-  </script>
+<script>
+function go(){
+  localStorage.setItem("player", document.getElementById("name").value);
+  window.location.href="play.html";
+}
+</script>
 
 </body>
 </html>
