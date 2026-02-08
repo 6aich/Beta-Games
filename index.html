@@ -2,93 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Beta Game</title>
+<title>Beta Game - Multi-Level</title>
 <style>
-  body, html {
-    margin: 0; padding: 0;
-    width: 100%; height: 100%;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-  }
+body, html {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
 
-  /* LOGIN PAGE */
-  #loginPage {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #f5a623, #f76b1c);
-    flex-direction: column;
-    color: white;
-    text-align: center;
-  }
-  #loginPage button {
-    padding: 15px 30px;
-    font-size: 20px;
-    cursor: pointer;
-    border: none;
-    border-radius: 10px;
-    background-color: #4CAF50;
-    color: white;
-    margin-top: 20px;
-  }
+/* LOGIN PAGE */
+#loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5a623, #f76b1c);
+  flex-direction: column;
+  color: white;
+  text-align: center;
+}
+#loginPage button {
+  padding: 15px 30px;
+  font-size: 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  background-color: #4CAF50;
+  color: white;
+  margin-top: 20px;
+}
 
-  /* PLAY PAGE */
-  #playPage {
-    display: none;
-    height: 100vh;
-    width: 100%;
-    background: linear-gradient(to bottom, #a0eaff, #ffffff);
-    justify-content: center;
-    align-items: center;
-  }
-  #playPage button {
-    padding: 15px 40px;
-    font-size: 24px;
-    border-radius: 15px;
-    border: none;
-    background-color: #87CEFA; /* light blue */
-    cursor: pointer;
-  }
+/* PLAY PAGE */
+#playPage {
+  display: none;
+  height: 100vh;
+  width: 100%;
+  background: linear-gradient(to bottom, #a0eaff, #ffffff);
+  justify-content: center;
+  align-items: center;
+}
+#playPage button {
+  padding: 15px 40px;
+  font-size: 24px;
+  border-radius: 15px;
+  border: none;
+  background-color: #87CEFA;
+  cursor: pointer;
+}
 
-  /* GAME PAGE */
-  #gamePage {
-    display: none;
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    background: url('https://thumbs.dreamstime.com/b/d-render-retro-style-video-game-maze-vibrant-whimsical-d-rendering-classic-video-game-maze-reminiscent-bit-404917490.jpg') repeat-x;
-    background-size: cover;
-    overflow: hidden;
-  }
+/* GAME PAGE */
+#gamePage {
+  display: none;
+  position: relative;
+  width: 3000px; /* Large width for scrolling */
+  height: 800px;
+  background: url('https://thumbs.dreamstime.com/b/d-render-retro-style-video-game-maze-vibrant-whimsical-d-rendering-classic-video-game-maze-reminiscent-bit-404917490.jpg') repeat-x;
+  background-size: cover;
+  overflow: hidden;
+}
 
-  /* MAORI CHARACTER */
-  #maori {
-    position: absolute;
-    bottom: 50px;
-    left: 50px;
-    width: 60px;
-    height: 80px;
-    background: url('https://res.cloudinary.com/aenetworks/image/upload/c_fill,ar_2,w_3840,h_1920,g_auto/dpr_auto/f_auto/q_auto:eco/v1/how-super-mario-helped-nintendo-conquer-the-video-game-worlds-featured-photo?_a=BAVAZGID0') no-repeat center/contain;
-  }
+/* CAMERA */
+#camera {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
 
-  /* POINTS DISPLAY */
-  #points {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 24px;
-    color: white;
-    font-weight: bold;
-  }
+/* MAORI CHARACTER */
+#maori {
+  position: absolute;
+  bottom: 50px;
+  left: 50px;
+  width: 60px;
+  height: 80px;
+  background: url('https://res.cloudinary.com/aenetworks/image/upload/c_fill,ar_2,w_3840,h_1920,g_auto/dpr_auto/f_auto/q_auto:eco/v1/how-super-mario-helped-nintendo-conquer-the-video-game-worlds-featured-photo?_a=BAVAZGID0') no-repeat center/contain;
+}
 
-  /* COLLECTIBLES */
-  .point {
-    position: absolute;
-    width: 30px; height: 30px;
-    background: gold;
-    border-radius: 50%;
-  }
+/* POINTS DISPLAY */
+#points {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+}
+
+/* COLLECTIBLES */
+.point {
+  position: absolute;
+  width: 30px; height: 30px;
+  background: gold;
+  border-radius: 50%;
+}
+
+/* DITCHES */
+.ditch {
+  position: absolute;
+  width: 200px;
+  height: 20px;
+  background: #000;
+}
 </style>
 </head>
 <body>
@@ -105,14 +121,25 @@
   <button onclick="startGame()">Play</button>
 </div>
 
-<!-- GAME PAGE -->
-<div id="gamePage">
-  <div id="points">Points: 0</div>
-  <div id="maori"></div>
+<!-- GAME PAGE WITH CAMERA -->
+<div id="camera">
+  <div id="gamePage">
+    <div id="points">Points: 0</div>
+    <div id="maori"></div>
+  </div>
 </div>
 
 <script>
 let score = 0;
+let level = 1;
+let maxPoints = 100;
+
+const maori = document.getElementById('maori');
+const gamePage = document.getElementById('gamePage');
+const camera = document.getElementById('camera');
+
+let positionX = 50;
+let positionY = 50;
 
 // PAGE TRANSITIONS
 function goToPlay() {
@@ -122,40 +149,67 @@ function goToPlay() {
 
 function startGame() {
   document.getElementById('playPage').style.display = 'none';
+  document.getElementById('camera').style.display = 'block';
   document.getElementById('gamePage').style.display = 'block';
-  spawnPoint();
+  spawnPointsLevel1();
+  spawnDitches();
 }
 
-// CHARACTER MOVEMENT
-const maori = document.getElementById('maori');
-const gamePage = document.getElementById('gamePage');
-
-let positionX = 50;
-let positionY = 50;
-
+// MOVEMENT + CAMERA FOLLOW
 document.addEventListener('keydown', (e) => {
   if(e.key === 'ArrowRight') positionX += 20;
   if(e.key === 'ArrowLeft') positionX -= 20;
   if(e.key === 'ArrowUp') positionY += 20;
   if(e.key === 'ArrowDown') positionY -= 20;
 
-  // keep inside screen
-  positionX = Math.max(0, Math.min(window.innerWidth-60, positionX));
-  positionY = Math.max(0, Math.min(window.innerHeight-80, positionY));
+  positionX = Math.max(0, Math.min(gamePage.offsetWidth-60, positionX));
+  positionY = Math.max(0, Math.min(gamePage.offsetHeight-80, positionY));
 
   maori.style.left = positionX + 'px';
   maori.style.bottom = positionY + 'px';
 
+  // Camera follows character
+  camera.scrollLeft = positionX - window.innerWidth/2 + 30;
+  camera.scrollTop = gamePage.offsetHeight - positionY - window.innerHeight/2 + 40;
+
   checkCollision();
+  checkDitch();
 });
 
-// SPAWN COLLECTIBLE POINTS
-function spawnPoint() {
-  const point = document.createElement('div');
-  point.classList.add('point');
-  point.style.left = Math.random() * (window.innerWidth-30) + 'px';
-  point.style.top = Math.random() * (window.innerHeight-30) + 'px';
-  gamePage.appendChild(point);
+// SPAWN POINTS
+function spawnPointsLevel1() {
+  // Clear old points
+  document.querySelectorAll('.point').forEach(p => p.remove());
+  for(let i=0; i<10; i++){
+    const point = document.createElement('div');
+    point.classList.add('point');
+    point.style.left = Math.random() * (gamePage.offsetWidth-30) + 'px';
+    point.style.top = Math.random() * (gamePage.offsetHeight-30) + 'px';
+    gamePage.appendChild(point);
+  }
+}
+
+function spawnPointsLevel2() {
+  document.querySelectorAll('.point').forEach(p => p.remove());
+  // Use coins in background as points (example: position over background "coins")
+  for(let i=0; i<10; i++){
+    const point = document.createElement('div');
+    point.classList.add('point');
+    point.style.left = 200 + i*250 + 'px'; // spread across background
+    point.style.top = 200 + (i%2)*100 + 'px';
+    gamePage.appendChild(point);
+  }
+}
+
+// DITCHES
+function spawnDitches() {
+  for(let i=0;i<5;i++){
+    const ditch = document.createElement('div');
+    ditch.classList.add('ditch');
+    ditch.style.left = 400 + i*400 + 'px';
+    ditch.style.bottom = 0;
+    gamePage.appendChild(ditch);
+  }
 }
 
 // COLLISION DETECTION
@@ -168,10 +222,57 @@ function checkCollision() {
       point.remove();
       score += 10;
       document.getElementById('points').innerText = 'Points: ' + score;
-      spawnPoint();
+      checkLevelUp();
     }
   });
 }
+
+// CHECK LEVEL UP
+function checkLevelUp() {
+  if(score >= maxPoints) {
+    level++;
+    score = 0;
+    document.getElementById('points').innerText = 'Points: ' + score;
+    if(level === 2){
+      alert("Level 2! Coins are now your points!");
+      spawnPointsLevel2();
+    } else if(level === 3){
+      alert("Level 3! Watch out for ditches, you can fall!");
+      spawnPointsLevel2(); // Keep same points layout
+    }
+  }
+}
+
+// CHECK DITCH
+function checkDitch() {
+  if(level === 3){
+    const ditches = document.querySelectorAll('.ditch');
+    const rect1 = maori.getBoundingClientRect();
+    ditches.forEach(ditch => {
+      const rect2 = ditch.getBoundingClientRect();
+      if(rect1.right > rect2.left && rect1.left < rect2.right && rect1.bottom <= rect2.top+5){
+        alert("You fell!");
+        // Reset character
+        positionX = 50;
+        positionY = 50;
+        maori.style.left = positionX + 'px';
+        maori.style.bottom = positionY + 'px';
+        camera.scrollLeft = 0;
+        camera.scrollTop = 0;
+      }
+    });
+  }
+}
+
+/* ===== DISRUPTION SECTION =====
+Here you can code your own game description, events, or changes:
+- Add more levels
+- Change point appearance
+- Add enemies or obstacles
+- Trigger special effects
+- Anything else you want!
+*/
+
 </script>
 
 </body>
