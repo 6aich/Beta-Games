@@ -10,7 +10,8 @@
     font-family: Arial, sans-serif;
     overflow: hidden;
   }
-  /* Login Page */
+
+  /* LOGIN PAGE */
   #loginPage {
     display: flex;
     justify-content: center;
@@ -18,6 +19,8 @@
     height: 100vh;
     background: linear-gradient(135deg, #f5a623, #f76b1c);
     flex-direction: column;
+    color: white;
+    text-align: center;
   }
   #loginPage button {
     padding: 15px 30px;
@@ -27,9 +30,10 @@
     border-radius: 10px;
     background-color: #4CAF50;
     color: white;
+    margin-top: 20px;
   }
 
-  /* Play Page */
+  /* PLAY PAGE */
   #playPage {
     display: none;
     height: 100vh;
@@ -47,28 +51,28 @@
     cursor: pointer;
   }
 
-  /* Game Page */
+  /* GAME PAGE */
   #gamePage {
     display: none;
     position: relative;
     width: 100%;
     height: 100vh;
-    background: url('https://i.imgur.com/8iYvIhL.png') repeat-x; /* example Maori background */
+    background: url('https://thumbs.dreamstime.com/b/d-render-retro-style-video-game-maze-vibrant-whimsical-d-rendering-classic-video-game-maze-reminiscent-bit-404917490.jpg') repeat-x;
     background-size: cover;
     overflow: hidden;
   }
 
-  /* Maori Character */
+  /* MAORI CHARACTER */
   #maori {
     position: absolute;
     bottom: 50px;
     left: 50px;
     width: 60px;
     height: 80px;
-    background: url('https://i.imgur.com/3qPqQ7D.png') no-repeat center/contain;
+    background: url('https://res.cloudinary.com/aenetworks/image/upload/c_fill,ar_2,w_3840,h_1920,g_auto/dpr_auto/f_auto/q_auto:eco/v1/how-super-mario-helped-nintendo-conquer-the-video-game-worlds-featured-photo?_a=BAVAZGID0') no-repeat center/contain;
   }
 
-  /* Points */
+  /* POINTS DISPLAY */
   #points {
     position: absolute;
     top: 10px;
@@ -78,7 +82,7 @@
     font-weight: bold;
   }
 
-  /* Collectibles */
+  /* COLLECTIBLES */
   .point {
     position: absolute;
     width: 30px; height: 30px;
@@ -89,80 +93,85 @@
 </head>
 <body>
 
-<!-- Login Page -->
+<!-- LOGIN PAGE -->
 <div id="loginPage">
   <h1>Welcome to Beta Game</h1>
+  <p>Click login to start your adventure!</p>
   <button onclick="goToPlay()">Login</button>
 </div>
 
-<!-- Play Page -->
+<!-- PLAY PAGE -->
 <div id="playPage">
   <button onclick="startGame()">Play</button>
 </div>
 
-<!-- Game Page -->
+<!-- GAME PAGE -->
 <div id="gamePage">
   <div id="points">Points: 0</div>
   <div id="maori"></div>
 </div>
 
 <script>
-  let score = 0;
+let score = 0;
 
-  function goToPlay() {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('playPage').style.display = 'flex';
-  }
+// PAGE TRANSITIONS
+function goToPlay() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('playPage').style.display = 'flex';
+}
 
-  function startGame() {
-    document.getElementById('playPage').style.display = 'none';
-    document.getElementById('gamePage').style.display = 'block';
-    spawnPoint();
-  }
+function startGame() {
+  document.getElementById('playPage').style.display = 'none';
+  document.getElementById('gamePage').style.display = 'block';
+  spawnPoint();
+}
 
-  const maori = document.getElementById('maori');
-  const gamePage = document.getElementById('gamePage');
+// CHARACTER MOVEMENT
+const maori = document.getElementById('maori');
+const gamePage = document.getElementById('gamePage');
 
-  // Character movement
-  let positionX = 50;
-  let positionY = 50;
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'ArrowRight') positionX += 20;
-    if(e.key === 'ArrowLeft') positionX -= 20;
-    if(e.key === 'ArrowUp') positionY -= 20;
-    if(e.key === 'ArrowDown') positionY += 20;
+let positionX = 50;
+let positionY = 50;
 
-    // keep inside screen
-    positionX = Math.max(0, Math.min(window.innerWidth-60, positionX));
-    positionY = Math.max(0, Math.min(window.innerHeight-80, positionY));
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') positionX += 20;
+  if(e.key === 'ArrowLeft') positionX -= 20;
+  if(e.key === 'ArrowUp') positionY += 20;
+  if(e.key === 'ArrowDown') positionY -= 20;
 
-    maori.style.left = positionX + 'px';
-    maori.style.bottom = positionY + 'px';
+  // keep inside screen
+  positionX = Math.max(0, Math.min(window.innerWidth-60, positionX));
+  positionY = Math.max(0, Math.min(window.innerHeight-80, positionY));
 
-    checkCollision();
+  maori.style.left = positionX + 'px';
+  maori.style.bottom = positionY + 'px';
+
+  checkCollision();
+});
+
+// SPAWN COLLECTIBLE POINTS
+function spawnPoint() {
+  const point = document.createElement('div');
+  point.classList.add('point');
+  point.style.left = Math.random() * (window.innerWidth-30) + 'px';
+  point.style.top = Math.random() * (window.innerHeight-30) + 'px';
+  gamePage.appendChild(point);
+}
+
+// COLLISION DETECTION
+function checkCollision() {
+  const pointsElements = document.querySelectorAll('.point');
+  pointsElements.forEach(point => {
+    const rect1 = maori.getBoundingClientRect();
+    const rect2 = point.getBoundingClientRect();
+    if(!(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom)){
+      point.remove();
+      score += 10;
+      document.getElementById('points').innerText = 'Points: ' + score;
+      spawnPoint();
+    }
   });
-
-  function spawnPoint() {
-    const point = document.createElement('div');
-    point.classList.add('point');
-    point.style.left = Math.random() * (window.innerWidth-30) + 'px';
-    point.style.top = Math.random() * (window.innerHeight-30) + 'px';
-    gamePage.appendChild(point);
-  }
-
-  function checkCollision() {
-    const pointsElements = document.querySelectorAll('.point');
-    pointsElements.forEach(point => {
-      const rect1 = maori.getBoundingClientRect();
-      const rect2 = point.getBoundingClientRect();
-      if(!(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom)){
-        point.remove();
-        score += 10;
-        document.getElementById('points').innerText = 'Points: ' + score;
-        spawnPoint();
-      }
-    });
-  }
+}
 </script>
 
 </body>
